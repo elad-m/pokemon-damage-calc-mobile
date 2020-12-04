@@ -43,7 +43,6 @@ function ItemPickerTextInput(props){
     const queryFunction = props.itemType ==='pokemon'? 
         props.allPokemonData.findAllPokemonStartWith: 
         props.allPokemonData.findAllMovesStartWith;
-    console.log(`query function: ${queryFunction}`);
     return (
         <View style={styles.itemPickerTextInputContainer}>
             <TextInput 
@@ -199,7 +198,7 @@ function ItemPicker(props){
                 itemType={props.itemType}
             />
 
-            {/* Attacker/Defender and picker button*/}
+            {/* Item title and picker button in a row*/}
             <View style={styles.itemPickerRow}>
                 <View style={styles.titleTextView}>
                     <Text style={styles.titleText}>
@@ -220,11 +219,13 @@ function ItemPicker(props){
                     </Text>
                 </Pressable>
             </View>
-
             <View style={{width:'100%', height:1, backgroundColor:'black'}}/>
+
+
         </View>
     );
 }
+
 
 function Picker(props){
     const [pokemonText, setPokemonText] = useState('');

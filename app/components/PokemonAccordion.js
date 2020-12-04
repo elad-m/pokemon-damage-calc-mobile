@@ -1,134 +1,144 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState } from 'react';
 import { 
+    ActivityIndicator,
+    Image,
     StyleSheet, 
-    Text, 
     View, 
     ScrollView,
     TouchableOpacity,
     } from 'react-native';
 
-import Constants from 'expo-constants';
 import * as Animatable from 'react-native-animatable';
 import Accordion from 'react-native-collapsible/Accordion';
 
+import colors from '../config/colors';
+
+const jsdom = require('jsdom-jscore-rn');
+
+
+function renderHeader(section, _, isActive){
+  return (
+    <Animatable.View
+      duration={200}
+      style={[styles.header, isActive ? styles.activeHeader : styles.inactiveHeader]}
+      transition="backgroundColor"
+    >
+      <View style={styles.headerText}>
+        {section}
+      </View>
+    </Animatable.View>
+  );
+};
+
+
+function FetchPokemonImage(props){
+    const bulbaRequest = `https://bulbapedia.bulbagarden.net/wiki/${props.pokemonName}_(Pok%C3%A9mon)`;
+    const [isLoading, setLoading] = useState(true);
+    const [imageURI, setImageURI] = useState("https://i.imgur.com/TkIrScD.png");// return to []?
+  
+    useEffect(() => {
+      fetch(bulbaRequest)
+        .then((response) => 
+            response.text()
+        )
+        .then((text) => {
+            jsdom.env(text, (_,dom) => {
+                let uri = dom.document.querySelector('meta[property="og:image"]').content;
+                console.log(`uri? : ${uri}`);
+                setImageURI(uri);    
+            }) // not sure how to turn this into a pure promise chaining with 'then'
+        })
+        .catch((error) => console.error(error))
+        .finally(() => setLoading(false));
+    }, [props.pokemonName]);
+  
+    return (
+      <View style={{ flex: 1, padding: 24 }}>
+        {isLoading ? <ActivityIndicator/> : (
+            <View>
+                <Image source={{uri: imageURI}} 
+                    style={{width: 305, height: 160}}
+                    resizeMode='contain'/>
+            </View>
+        )}
+      </View>
+    );
+}
+
+
+function renderContent(section, _, isActive){
+    return (
+        <Animatable.View
+            style={styles.content}
+            transition="backgroundColor"
+        >
+            <Animatable.View 
+                animation={isActive ? 'fadeInDown' : undefined}
+                duration={300}>
+                {section.props.itemType === 'pokemon' && 
+                    <FetchPokemonImage
+                        pokemonName={section.props.selectedItem.name}
+                    />
+                }
+            </Animatable.View>
+      </Animatable.View>
+  );
+}
 
 function PokemonAccordion(props){
-    const [collapsibleState, setCollapsibleState] = useState({
+    const [accordionState, setAccordionState] = useState({
         collapsed: true,
         activeSections: [],
     });
     
     const setSections = sections => {
-        setCollapsibleState({
-            collapsed: !collapsibleState.collapsed,
+        setAccordionState({
+            collapsed: !accordionState.collapsed,
             activeSections: sections.includes(undefined)? [] : sections,
         });
     }
-    const renderHeader = (section, _, isActive) => {
-        return (
-          <Animatable.View
-            duration={400}
-            style={[styles.header, isActive ? styles.active : styles.inactive]}
-            transition="backgroundColor"
-          >
-            <Text style={styles.headerText}>
-                {section.title}</Text>
-          </Animatable.View>
-        );
-      };
 
-    const renderContent = (section, _, isActive) => {
-        return (
-            <Animatable.View
-                duration={400}
-                style={[styles.content, isActive ? styles.active : styles.inactive]}
-                transition="backgroundColor"
-            >
-                <Animatable.Text animation={isActive ? 'bounceIn' : undefined}>
-                    {section.content}
-                </Animatable.Text>
-            </Animatable.View>
-        );
-    }
 
     return (
-        <View style={styles.container}>
-            <ScrollView contentContainerStyle={{ paddingTop: 30 }}>
-                <Text style={styles.title}>Accordion Example</Text>
-    
-                <Accordion
-                    activeSections={collapsibleState.activeSections}
-                    sections={props.content}
-                    touchableComponent={TouchableOpacity}
-                    expandMultiple={false}
-                    renderHeader={renderHeader}
-                    renderContent={renderContent}
-                    duration={400}
-                    onChange={setSections}
-                />
-            </ScrollView>
-      </View>
+        <ScrollView contentContainerStyle={styles.container}> 
+            <Accordion
+                activeSections={accordionState.activeSections}
+                sections={props.content}
+                touchableComponent={TouchableOpacity}
+                expandMultiple={false}
+                renderHeader={renderHeader}
+                renderContent={renderContent}
+                duration={400}
+                onChange={setSections}
+            />
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({  
     container: {
         flex: 1,
-        backgroundColor: '#F5FCFF',
-        paddingTop: Constants.statusBarHeight,
-      },
-      title: {
-        textAlign: 'center',
-        fontSize: 22,
-        fontWeight: '300',
-        marginBottom: 20,
-      },
-      header: {
-        backgroundColor: '#F5FCFF',
+        backgroundColor: colors.primary,
+        paddingTop: 20 
+    },
+    header: {
         padding: 10,
-      },
-      headerText: {
+    },
+    headerText: {
         textAlign: 'center',
-        fontSize: 16,
+        fontSize: 20,
         fontWeight: '500',
-      },
-      content: {
+    },
+    content: {
         padding: 20,
-        backgroundColor: '#fff',
-      },
-      active: {
-        backgroundColor: 'rgba(255,255,255,1)',
-      },
-      inactive: {
-        backgroundColor: 'rgba(245,252,255,1)',
-      },
-      selectors: {
-        marginBottom: 10,
-        flexDirection: 'row',
-        justifyContent: 'center',
-      },
-      selector: {
-        backgroundColor: '#F5FCFF',
-        padding: 10,
-      },
-      activeSelector: {
-        fontWeight: 'bold',
-      },
-      selectTitle: {
-        fontSize: 14,
-        fontWeight: '500',
-        padding: 10,
-      },
-      multipleToggle: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginVertical: 30,
-        alignItems: 'center',
-      },
-      multipleToggle__title: {
-        fontSize: 16,
-        marginRight: 8,
-      },
+        backgroundColor: colors.secondary,
+    },
+    activeHeader: {
+        backgroundColor: colors.secondary,
+    },
+    inactiveHeader: {
+        backgroundColor: colors.primary,
+    },
 });
 
 export default PokemonAccordion;

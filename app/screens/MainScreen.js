@@ -58,52 +58,64 @@ function makeSimpleCalculate(attacker, defender, move, setDamageResult){
     });
 }
 
+function getAccordionSections(allPokemonData,
+    attacker, setAttacker,
+    move, setMove,
+    defender, setDefender){
+    return (
+        [<Picker
+            selectedItem={attacker}
+            setSelectedItem={setAttacker}
+            allPokemonData={allPokemonData}
+            itemType='pokemon'
+            message={POKEMON_ROLE.at}
+        />,
+        <Picker
+            selectedItem={move}
+            setSelectedItem={setMove}
+            allPokemonData={allPokemonData}
+            itemType='move'
+            message='Move'
+        />,
+        <Picker
+            selectedItem={defender}
+            setSelectedItem={setDefender}
+            allPokemonData={allPokemonData}
+            itemType='pokemon'
+            message={POKEMON_ROLE.df}
+        />,
+    ])
+} 
+
 
 function MainScreen(props) {
     // pokemon and moves are now objects
     const allPokemonData = AllPokemonData();
+
     const [attacker, setAttacker] = useState(allPokemonData.defaultPokemon);
     const [move, setMove] = useState(allPokemonData.defaultMove);
     const [defender, setDefender] = useState(allPokemonData.defaultPokemon);
     const [damageResult, setDamageResult] = useState({});
     const simpleCalculateWithProps = makeSimpleCalculate(attacker, defender, move, setDamageResult);
-
+    const sections = getAccordionSections(allPokemonData, attacker, setAttacker, move, setMove, defender, setDefender);
     console.log(`MAIN: attacker ${attacker.name} move: ${move.name} defender:${defender.name}`);
+    
     return (
             
         <SafeAreaView id='mainViewId' style={styles.mainView}>
-            <Picker
-                selectedItem={attacker}
-                setSelectedItem={setAttacker}
-                allPokemonData={allPokemonData}
-                itemType='pokemon'
-                message={POKEMON_ROLE.at}
+            <PokemonAccordion
+                content={sections}
             />
-            <Picker
-                selectedItem={move}
-                setSelectedItem={setMove}
-                allPokemonData={allPokemonData}
-                itemType='move'
-                message='Move'
-            />
-            <Picker
-                selectedItem={defender}
-                setSelectedItem={setDefender}
-                allPokemonData={allPokemonData}
-                itemType='pokemon'
-                message={POKEMON_ROLE.df}
-            />
-            {/* <PokemonAccordion/> */}
 
-            <View id="result" style={styles.itemPickerContainer}>
-                <Text style={{...styles.titleText}}>
-                    {damageResult.fullDesc? damageResult.fullDesc(): ''}
-                </Text>
-            </View>
-
-            
             <View id="calculate" style={{...styles.itemPickerContainer,
-                flexDirection: 'row', position:'absolute', bottom:20,  alignSelf:'center' }}>
+                flexDirection: 'column', position:'absolute', bottom:20,  alignSelf:'center' }}>
+                
+                <View id="result" style={styles.itemPickerContainer}>
+                    <Text style={{...styles.titleText}}>
+                        {damageResult?(damageResult.fullDesc? damageResult.fullDesc(): ''):''}
+                    </Text>
+                </View>
+
                 <Pressable
                     onPress={simpleCalculateWithProps}
                     style={{...styles.pressableWrapper}}
