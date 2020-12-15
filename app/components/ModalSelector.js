@@ -13,26 +13,22 @@ import {
 
 import colors from '../config/colors';
 
-function getQueryItem(queryResults, itemType, allPokemonData){
-    const typeDefault = itemType ==='pokemon'? 
-        allPokemonData.defaultPokemon: 
-        allPokemonData.defaultMove;
-    return queryResults.length > 0? queryResults[0]: typeDefault;
-}
 
+function getQueryItem(queryResults, defaultSelection){
+    return queryResults.length > 0? queryResults[0]: defaultSelection;
+}
 
 function ClearButton(props){
     // for now only deletes the text and not the pokemon
+    const {allResults, searchText, setSearchText, setQueryResults} = props;
     function handleClear(){
-        props.setItemText('');
-        props.itemType === 'pokemon'? 
-            props.setQueryResults(props.allPokemonData.pokedexPerGen): 
-            props.setQueryResults(props.allPokemonData.movesPerGen); 
+        setSearchText('');
+        setQueryResults(allResults);
     }
     return (
         <Pressable
             android_ripple={{radius: 10}} 
-            style={[styles.pressableWrapper, styles.clearButton, !(props.itemText)? styles.clearButtonOpaque: styles.clearButton]}
+            style={[styles.pressableWrapper, styles.clearButton, !(searchText)? styles.clearButtonOpaque: styles.clearButton]}
             onPress={handleClear}>
             <Text style={styles.pressableInnerText}>Clear</Text>
         </Pressable>
@@ -40,34 +36,33 @@ function ClearButton(props){
 }
 
 function ItemPickerTextInput(props){
-    const queryFunction = props.itemType ==='pokemon'? 
-        props.allPokemonData.findAllPokemonStartWith: 
-        props.allPokemonData.findAllMovesStartWith;
+    const { selected, setSelected, message,
+        queryFunction, allResults, defaultSelection,
+        searchText, setSearchText, 
+        queryResults, setQueryResults, 
+        areResultsVisible, setResultsVisible} = props;
     return (
-        <View style={styles.itemPickerTextInputContainer}>
+        <View style={styles.modalSelectorTextInputContainer}>
             <TextInput 
-                style={styles.itemPickerTextInput}
+                style={styles.modalSelectorTextInput}
                 maxLength={20}
-                placeholder={`Enter a ${props.itemType}'s name`}
+                placeholder={`Enter a ${message.toLowerCase()}'s name`}
                 onFocus={e => {
-                    console.log('onFocus');
-                    props.setQueryResults(queryFunction(props.itemText));
+                    setQueryResults(queryFunction(searchText));
                 }}
                 onChangeText={text => {
-                    console.log('onChangeText');
-                    props.setItemText(text);
-                    props.setQueryResults(queryFunction(text));
+                    setSearchText(text);
+                    setQueryResults(queryFunction(text));
                 }}
                 onSubmitEditing={e => {
-                    console.log('onSubmitEditing');
-                    const pickedItem = getQueryItem(props.queryResults, props.itemType, props.allPokemonData);
-                    props.setSelectedItem(pickedItem); //logic
-                    props.setItemText(pickedItem.name);// ui
+                    const pickedItem = getQueryItem(queryResults, defaultSelection);
+                    setSelected(pickedItem); //logic
+                    setSearchText(pickedItem.name);// ui
                     // removing stuff
                     Keyboard.dismiss();
-                    props.setResultsVisible(false);
+                    setResultsVisible(false);
                 }}
-                value={props.itemText}
+                value={searchText}
             />
         </View>
     );
@@ -75,6 +70,7 @@ function ItemPickerTextInput(props){
 
 
 function Item(props){
+    const {item, setSearchText, setResultsVisible, setSelected} = props;
     return (
         <Pressable
             style={{...styles.pressableWrapper, alignSelf:'stretch'} }
@@ -84,13 +80,13 @@ function Item(props){
             activeOpacity={0.3}
             underlayColor={'black'}
             onPress={() => {
-                props.setSelectedItem(props.item);
-                props.setItemText(props.item.name)
+                setSelected(item);
+                setSearchText(item.name);
                 Keyboard.dismiss();
-                props.setResultsVisible(false);
+                setResultsVisible(false);
             }}
         >
-            <Text style={styles.textListItem}>{props.item.name}</Text>
+            <Text style={styles.textListItem}>{item.name}</Text>
         </Pressable>
   );
 }
@@ -100,12 +96,12 @@ function ItemResultsModalList(props){
     const renderItem = ({ item }) => (
         <Item 
             item={item}
-            setItemText={props.setItemText}
+            setSearchText={props.setSearchText}
             setResultsVisible={props.setResultsVisible}
-            setSelectedItem={props.setSelectedItem}
+            setSelected={props.setSelected}
         />
     );
-    function ListSeparator(props){
+    function ListSeparator(){
         return (<View style={{height: 1, backgroundColor: colors.titleText}}/>);
     }
     return (
@@ -117,33 +113,24 @@ function ItemResultsModalList(props){
                 <View style={{...styles.centeredView, }} >
                     <View style={{...styles.modalView, }} >
                         <ItemPickerTextInput
-                            selectedItem={props.selectedItem}
-                            setSelectedItem={props.setSelectedItem}
-                            allPokemonData={props.allPokemonData}
-                            itemText={props.itemText}
-                            setItemText={props.setItemText}
-                            queryResults={props.queryResults}
-                            setQueryResults={props.setQueryResults}
-                            setResultsVisible={props.setResultsVisible}        
-                            itemType={props.itemType}
+                            {...props}        
                         />
                         <SafeAreaView style={styles.resultsFlatListContainer} >
                             <FlatList
                                 keyboardShouldPersistTaps='always' // so that list items are pressable when keyboard up
                                 ItemSeparatorComponent={ListSeparator}
-                                style={styles.resultsFlatList}
                                 data={props.queryResults}
                                 renderItem={renderItem}
                                 keyExtractor={(item) => item.id}
                             />
-                        
                         </SafeAreaView>
                         <View style={styles.resultsListButtonsRowView}>
+                            {/* Done Button*/}
                             <Pressable
                                 android_ripple={{radius: 10}}
                                 onPress={() => {
                                     props.setResultsVisible(false);
-                                    props.setItemText(props.selectedItem.name);
+                                    props.setSearchText(props.selected.name);
                                 }}
                                 style={({pressed}) => [
                                     {
@@ -159,11 +146,10 @@ function ItemResultsModalList(props){
                             </Pressable>
                                 
                             <ClearButton
-                                allPokemonData={props.allPokemonData}
-                                itemText={props.itemText}
-                                setItemText={props.setItemText}
+                                allResults={props.allResults}
+                                searchText={props.searchText}
+                                setSearchText={props.setSearchText}
                                 setQueryResults={props.setQueryResults}
-                                itemType={props.itemType}
                             />
                         </View>
                     </View>
@@ -173,92 +159,45 @@ function ItemResultsModalList(props){
     );
 }
 
-function ItemPicker(props){
-    //states regarding the autocomplete picker query results
-    const initQueryResults = props.itemType === 'pokemon'? 
-        props.allPokemonData.pokedexPerGen : 
-        props.allPokemonData.movesPerGen;
-    const [queryResults, setQueryResults] = useState(initQueryResults);
+function ModalSelector(props){
+    
+    const [searchText, setSearchText] = useState('');
+    const [queryResults, setQueryResults] = useState(props.allResults);
     const [areResultsVisible, setResultsVisible] = useState(false);
 
-    console.log(`PICKER: item: ${props.selectedItem.name}\tqueryRes[0]: ${getQueryItem(queryResults, props.itemType, props.allPokemonData).name}\ttext: ${props.itemText}`);
+    console.log(`PICKER: item: ${props.selected.name}\tqueryRes[0]: ${getQueryItem(queryResults, props.itemType, props.allPokemonData).name}\ttext: ${props.itemText}`);
   
     return (
-        <View style={styles.itemPickerContainer}>
+        <View style={styles.modalSelectorContainer}>
             <ItemResultsModalList
-                itemText={props.itemText}
-                setItemText={props.setItemText}
-                allPokemonData={props.allPokemonData}
-                selectedItem={props.selectedItem}
-                setSelectedItem={props.setSelectedItem}
+                {...props} // all, default and query function
+                searchText={searchText}
+                setSearchText={setSearchText}
                 queryResults={queryResults}
                 setQueryResults={setQueryResults}
                 areResultsVisible={areResultsVisible}
                 setResultsVisible={setResultsVisible}
-                itemType={props.itemType}
             />
-
-            {/* Item title and picker button in a row*/}
-            <View style={styles.itemPickerRow}>
-                <View style={styles.titleTextView}>
-                    <Text style={styles.titleText}>
-                        {props.message}:
-                    </Text>
-                </View>
-
-                <Pressable
-                    onPress={() => {
-                        setResultsVisible(true);
-                    }}
-                    style={styles.pressableWrapper}
-                    style={({pressed}) => [
-                        {opacity: pressed? 0.5 : 1}, styles.pressableWrapper
-                        ]}>
-                    <Text style={styles.pressableInnerText}>
-                        {props.selectedItem.name}
-                    </Text>
-                </Pressable>
-            </View>
-            <View style={{width:'100%', height:1, backgroundColor:'black'}}/>
-
-
+            <Pressable
+                onPress={() => {
+                    setResultsVisible(true);
+                }}
+                style={{...styles.pressableWrapper, flex:0}}
+                style={({pressed}) => [
+                    {opacity: pressed? 0.5 : 1}, {...styles.pressableWrapper, flex:0}
+                    ]}>
+                <Text style={styles.pressableInnerText}>
+                    {props.selected.name}
+                </Text>
+            </Pressable>
         </View>
     );
 }
 
-
-function Picker(props){
-    const [pokemonText, setPokemonText] = useState('');
-    return(
-        <ItemPicker 
-            selectedItem={props.selectedItem}
-            setSelectedItem={props.setSelectedItem}
-            allPokemonData={props.allPokemonData}
-            itemText={pokemonText}
-            setItemText={setPokemonText}
-            itemType={props.itemType}
-            message={props.message}
-        />
-    );
-}
-
 const styles = StyleSheet.create({
-    itemPickerContainer: {
+    modalSelectorContainer: {
+        flex:1,
         alignItems:'center',
-    },
-    itemPickerRow: {
-        flexDirection:'row',
-        justifyContent:'space-around',
-        padding:5,
-    },
-    titleTextView: {
-        flex:1, 
-        alignSelf:'center',
-    },
-    titleText:{
-        textAlign: 'center',
-        color: 'black',
-        fontSize: 20,
     },
     pressableWrapper:{
         flex:1, 
@@ -292,8 +231,7 @@ const styles = StyleSheet.create({
         backgroundColor:colors.header,
         borderBottomEndRadius:10,
         borderBottomStartRadius:10,
-        elevation:2,
-        
+        elevation:2,    
     },
     clearButton: {
         backgroundColor:colors.clearButton,
@@ -301,7 +239,6 @@ const styles = StyleSheet.create({
     clearButtonOpaque: {
         backgroundColor:colors.opaqueClearButton
     },
-    
     centeredView: {
         padding:10,
     },
@@ -320,10 +257,10 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
     },
-    itemPickerTextInputContainer:{
+    modalSelectorTextInputContainer:{
         padding:10,
     },
-    itemPickerTextInput: {
+    modalSelectorTextInput: {
         fontSize:17,
         textAlign:'center',
         padding:10,
@@ -335,8 +272,6 @@ const styles = StyleSheet.create({
     resultsFlatListContainer: {    
         height:Dimensions.get('window').height*0.4,
     },
-    resultsFlatList:{
-    },
     textListItem: {
         padding:10,
         fontSize: 17,  
@@ -346,4 +281,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default Picker;
+export default ModalSelector;

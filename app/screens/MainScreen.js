@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, {useEffect, useReducer, useState } from 'react';
 import { 
     Pressable,
     SafeAreaView,
@@ -9,15 +9,17 @@ import {
 
 import colors from '../config/colors';
 import PokemonAccordion from '../components/PokemonAccordion';
-import Picker from '../components/Picker';
+import ModalSelector from '../components/ModalSelector';
+import StatsTable from '../components/StatsTable';
+import RowWrapper from '../components/RowWrapper';
 
 const  {calculate, Generations, Pokemon, Move} = require('@smogon/calc') ;
+const PokemonSet = require('../models/pokemonSet');
 
-const POKEMON_ROLE = {'at': 'Attacker', 'df': 'Defender'};
-
+const POKEMON_ROLE = ['Pokémon 1','Pokémon 2'];
 const gen = Generations.get(7); 
 
-function AllPokemonData () {
+function getAllPokemonData (gen) {
     let pokedexPerGen = Array.from(gen.species).sort((a, b) => a.name > b.name);
     let defaultPokemon = pokedexPerGen[0];
     
@@ -42,91 +44,112 @@ function AllPokemonData () {
         findAllMovesStartWith};
 };
 
-function makeSimpleCalculate(attacker, defender, move, setDamageResult){
-    return (() => {
+const allPokemonData = getAllPokemonData(gen);
+
+function simpleCalculate(pokemonSet1, pokemonSet2){
+    // return (() => {
         const result = calculate(
             gen,
-            new Pokemon(gen, attacker.name, {
+            new Pokemon(gen, pokemonSet1.pokemon.name, {
+                evs: pokemonSet1.evs,
+                ivs: pokemonSet1.ivs,
             }),
-            new Pokemon(gen, defender.name, {
+            new Pokemon(gen, pokemonSet2.pokemon.name, {
+                evs: pokemonSet2.evs,
+                ivs: pokemonSet2.ivs,
             }),
-            new Move(gen, move.name)
+            new Move(gen, pokemonSet1.moves.name) /** TODOOOOOOOO 1 to array */  
           );
         const resultDescription = result.fullDesc('%', false);
         console.log(`Result: ${resultDescription}`);
-        setDamageResult(result)
-    });
+        // setDamageResult(result)
+        
+    // });
+    return resultDescription;
 }
 
-function getAccordionSections(allPokemonData,
-    attacker, setAttacker,
-    move, setMove,
-    defender, setDefender){
-    return (
-        [<Picker
-            selectedItem={attacker}
-            setSelectedItem={setAttacker}
-            allPokemonData={allPokemonData}
-            itemType='pokemon'
-            message={POKEMON_ROLE.at}
-        />,
-        <Picker
-            selectedItem={move}
-            setSelectedItem={setMove}
-            allPokemonData={allPokemonData}
-            itemType='move'
-            message='Move'
-        />,
-        <Picker
-            selectedItem={defender}
-            setSelectedItem={setDefender}
-            allPokemonData={allPokemonData}
-            itemType='pokemon'
-            message={POKEMON_ROLE.df}
-        />,
-    ])
-} 
 
+function getAccordionSection(allPokemonData, pokemonSet,dispatchPokemon){
+    
+    return {
+        pokemon:
+            <RowWrapper 
+                titleTextViewStyle={styles.titleTextView}
+                titleTextStyle={styles.titleText}
+                message={'Pokemon: '}>
+                <ModalSelector
+                    selected={pokemonSet.pokemon}
+                    setSelected={(payload) => dispatchPokemon({type: 'changePokemon', payload:payload})}
+                    queryFunction={allPokemonData.findAllPokemonStartWith}
+                    allResults={allPokemonData.pokedexPerGen}
+                    defaultSelection={allPokemonData.defaultPokemon}
+                    message={'Pokemon'}/>
+            </RowWrapper>,
+
+        
+        statsTable:
+            <StatsTable
+                pokemon={pokemonSet.pokemon}
+                ivs={pokemonSet.ivs}
+                setIvs={(payload) => dispatchPokemon({type: 'changeIvs', payload:payload})}
+                evs={pokemonSet.evs}
+                setEvs={(payload) => dispatchPokemon({type: 'changeEvs', payload:payload})}/>,
+        move:
+        <RowWrapper 
+            titleTextViewStyle={styles.titleTextView}
+            titleTextStyle={styles.titleText}
+            message={'Move: '}>
+            <ModalSelector
+                    selected={pokemonSet.moves}
+                    setSelected= {(payload) => dispatchPokemon({type: 'changeMove', payload:payload})}
+                    queryFunction={allPokemonData.findAllMovesStartWith}
+                    allResults={allPokemonData.movesPerGen}
+                    default={allPokemonData.defaultMove}
+                    message={'Move'}
+            />
+        </RowWrapper>,
+    };
+}
+function pokemonSetReducer(state, action){
+    switch (action.type) {
+        case 'changePokemon':
+            return new PokemonSet(action.payload, allPokemonData.defaultMove);
+        case 'changeMove':
+            return new PokemonSet(state.pokemon, action.payload, state.ivs, state.evs);
+        case 'changeIvs':
+            return new PokemonSet(state.pokemon, state.moves, action.payload, state.evs);
+        case 'changeEvs':
+            return new PokemonSet(state.pokemon, state.moves, state.ivs, action.payload);
+        default:
+            throw new Error('BAD action.type in pokemonSetReducer');
+    }
+}
 
 function MainScreen(props) {
-    // pokemon and moves are now objects
-    const allPokemonData = AllPokemonData();
+    const defaultSet = new PokemonSet(allPokemonData.defaultPokemon, allPokemonData.defaultMove);
+    const [pokemonSet1, dispatchPokemon1] = useReducer(pokemonSetReducer, defaultSet);
+    const [pokemonSet2, dispatchPokemon2] = useReducer(pokemonSetReducer, defaultSet);
+    const [damageResult, setDamageResult] = useState(simpleCalculate(pokemonSet1, pokemonSet2));
+    const accordionSections = [getAccordionSection(allPokemonData, pokemonSet1, dispatchPokemon1),
+                            getAccordionSection(allPokemonData, pokemonSet2, dispatchPokemon2)];
 
-    const [attacker, setAttacker] = useState(allPokemonData.defaultPokemon);
-    const [move, setMove] = useState(allPokemonData.defaultMove);
-    const [defender, setDefender] = useState(allPokemonData.defaultPokemon);
-    const [damageResult, setDamageResult] = useState({});
-    const simpleCalculateWithProps = makeSimpleCalculate(attacker, defender, move, setDamageResult);
-    const sections = getAccordionSections(allPokemonData, attacker, setAttacker, move, setMove, defender, setDefender);
-    console.log(`MAIN: attacker ${attacker.name} move: ${move.name} defender:${defender.name}`);
+    useEffect(() => {
+        setDamageResult(simpleCalculate(pokemonSet1, pokemonSet2));
+    }, [pokemonSet1, pokemonSet2]);
+    console.log(`MAIN: p1: ${pokemonSet1.pokemon.name} m1: ${pokemonSet1.moves.name}`);
+    
     
     return (
-            
         <SafeAreaView id='mainViewId' style={styles.mainView}>
             <PokemonAccordion
-                content={sections}
+                content={accordionSections}
+                accordionFlex={1}
             />
 
-            <View id="calculate" style={{...styles.itemPickerContainer,
-                flexDirection: 'column', position:'absolute', bottom:20,  alignSelf:'center' }}>
-                
-                <View id="result" style={styles.itemPickerContainer}>
-                    <Text style={{...styles.titleText}}>
-                        {damageResult?(damageResult.fullDesc? damageResult.fullDesc(): ''):''}
-                    </Text>
-                </View>
-
-                <Pressable
-                    onPress={simpleCalculateWithProps}
-                    style={{...styles.pressableWrapper}}
-                    style={({pressed}) => [
-                        {opacity: pressed? 0.5 : 1}, styles.pressableWrapper
-                        ]}
-                        >
-                    <Text style={styles.pressableInnerText}>
-                        Calculate!
-                    </Text>
-                </Pressable>
+            <View id="calculate" style={styles.resultContainer}>              
+                <Text style={{...styles.titleText}}>
+                    {damageResult?damageResult: ''}
+                </Text>
             </View>
         </SafeAreaView>
     );
@@ -137,8 +160,15 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.primary,
     },
-    itemPickerContainer: {
-        alignItems:'center',
+    resultContainer: {
+        alignItems:'center',    
+        backgroundColor:colors.secondary,
+        borderColor:'black',
+        borderWidth: 1,
+    },
+    titleTextView: {
+        flex:1, 
+        alignSelf:'center',
     },
     titleText:{
         textAlign: 'center',
