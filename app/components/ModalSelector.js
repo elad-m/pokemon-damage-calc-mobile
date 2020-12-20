@@ -117,7 +117,7 @@ function ItemResultsModalList(props){
                         />
                         <SafeAreaView style={styles.resultsFlatListContainer} >
                             <FlatList
-                                keyboardShouldPersistTaps='always' // so that list items are pressable when keyboard up
+                                keyboardShouldPersistTaps='handled' // so that list items are pressable when keyboard up
                                 ItemSeparatorComponent={ListSeparator}
                                 data={props.queryResults}
                                 renderItem={renderItem}
@@ -165,7 +165,7 @@ function ModalSelector(props){
     const [queryResults, setQueryResults] = useState(props.allResults);
     const [areResultsVisible, setResultsVisible] = useState(false);
 
-    console.log(`PICKER: item: ${props.selected.name}\tqueryRes[0]: ${getQueryItem(queryResults, props.itemType, props.allPokemonData).name}\ttext: ${props.itemText}`);
+    // console.log(`Selector: item: ${props.selected.name}\tqueryRes[0]: ${getQueryItem(queryResults, props.itemType, props.allPokemonData).name}\ttext: ${props.itemText}`);
   
     return (
         <View style={styles.modalSelectorContainer}>
@@ -186,7 +186,7 @@ function ModalSelector(props){
                 style={({pressed}) => [
                     {opacity: pressed? 0.5 : 1}, {...styles.pressableWrapper, flex:0}
                     ]}>
-                <Text style={styles.pressableInnerText}>
+                <Text style={{...styles.pressableInnerText, fontSize: props.selectorFontSize}}>
                     {props.selected.name}
                 </Text>
             </Pressable>
@@ -216,9 +216,6 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
-    },
-    onPressPressableWrapper: {
-        opacity: 0.5
     },
     pressableInnerText:{
         textAlign:'center',

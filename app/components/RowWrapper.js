@@ -2,11 +2,11 @@ import React from 'react';
 import {Text, View, StyleSheet } from 'react-native';
 
 function RowWrapper(props){
-    const {message, titleTextViewStyle, titleTextStyle} = props;
+    const {message, titleTextViewStyle, titleFontSize} = props;
     return(
         <View style={styles.RowContainer}>
             <View style={titleTextViewStyle}>
-                <Text style={titleTextStyle}>
+                <Text style={{...styles.textStyle, fontSize:titleFontSize}}>
                     {message} 
                 </Text>
             </View>
@@ -21,6 +21,10 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         justifyContent:'space-around',
         padding:5,
+    },
+    textStyle:{
+        textAlign:'center',
+        color: 'black', 
     },
 });
 

@@ -6,7 +6,7 @@ import colors from '../config/colors';
 
 const STAT_FIELDS = {hp: "HP", atk: "Atk", def: "Def", spa: "Sp. Atk", spd: "Sp. Def", spe: "Speed"};
 
-function calcStat(stat, base, iv, ev, level=50){
+function calcStat(stat, base, iv, ev, level=100){
     if (stat === 'hp') {
         return base === 1
             ? base
@@ -96,9 +96,9 @@ function StatsTable(props){
         setFinalValues(Object.assign({}, ...Object.keys(baseStats)
                     .map(k => ({[k]: calcStat(k, baseStats[k], ivs[k], evs[k])}))));
     },[ivs, evs]);
-    console.log(`base: ${Object.values(baseStats)} \
-    ivs: ${Object.entries(ivs)} evs: ${Object.values(evs)} \
-    fins: ${Object.values(finalValues)}`);
+    // console.log(`base: ${Object.values(baseStats)} \
+    // ivs: ${Object.entries(ivs)} evs: ${Object.values(evs)} \
+    // fins: ${Object.values(finalValues)}`);
     return (
         <View style={styles.table}>
             

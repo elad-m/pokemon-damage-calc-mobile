@@ -9,25 +9,30 @@ import {
     TouchableOpacity,
     } from 'react-native';
 
-import * as Animatable from 'react-native-animatable';
+
 import Accordion from 'react-native-collapsible/Accordion';
 
 import colors from '../config/colors';
+import dimens from '../config/dimens';
 
 const jsdom = require('jsdom-jscore-rn');
 
 const LOREM_SIMPSON = "and all who dwell within this rocket house tomacco retirony unfaceuptoable rappin' surfer sacrilicious where's poochie? no-breath chazwazers california cheeseburger mazuma diddily explosion land redorkulated searing gas pain land foodrinkery skanks for nothing speedholes gamblor swishifying homersexual gamblor poor wiggum. here's vanessa williams eat our shirts uncle ant word hole the old wiggum charm squozen baby guts superliminal no-breath poochie eat my shirt suck like a fox blundering numbskullery dirty, maybe. dangerous, hardly. foodrinkery four krustys esquilax nuisancefon ovulicious dodgerock dead serious about kapowza clouseauesque knifey wifey crisitunity ovulicious perspicacity poochie magumba johnny lunchpail science pole zing yoink nervous pervis microcalifragilistics suspicious aloysius my children need wine assal horizontology here's vanessa williams sunblocker garbagewater crayola oblongata zork spiritual de-pantsing assal horizontology unpossible fireworks factory";
 
+
+
 function renderHeader(section, _, isActive){
   return (
     <View
-      duration={200}
-      style={[styles.header, isActive ? styles.activeHeader : styles.inactiveHeader]}
-      transition="backgroundColor"
+        style={styles.sectionHeader}
     >
-      {/* <View style={styles.headerText}> */}
+        {/* <View
+            style={{backgroundColor:'black', height: dimens.headerFooterHeight, 
+            borderTopLeftRadius:dimens.headerFooterRadius,
+            borderTopRightRadius:dimens.headerFooterRadius}}
+        /> */}
         {section.pokemon}
-      {/* </View> */}
+        {section.move}
     </View>
   );
 };
@@ -72,20 +77,30 @@ function renderContent(section, _, isActive){
     return (
         <ScrollView
             style={styles.sectionContent}
+            keyboardShouldPersistTaps={'always'}
         >
             {/* {section.pokemon.props.itemType === 'pokemon' && 
                 <FetchPokemonImage
                     pokemonName={section.pokemon.props.selectedItem.name}
                 />
             } */}
-            {section.move}
             {section.statsTable}
-            {/* <Text>
-                {LOREM_SIMPSON}
-            </Text> */}
       </ScrollView>
   );
 }
+
+function renderFooter(section, _, isActive){
+    return (
+        <View keyboardShouldPersistTaps={'always'}>
+            <View style={styles.sectionFooter}>
+                <Text style={{fontSize: 20, color:'black', textAlign: 'center',}}>
+                    
+                </Text>
+            </View>
+        </View>
+  );
+}
+
 
 function PokemonAccordion(props){
     const {content, accordionFlex} = props;
@@ -102,7 +117,9 @@ function PokemonAccordion(props){
     }
 
     return (
-        <ScrollView style={{...styles.accordionContainer, flex: accordionFlex}}> 
+        <ScrollView 
+            style={{...styles.accordionContainer, flex: accordionFlex}}
+            keyboardShouldPersistTaps={'always'}> 
             <Accordion
                 activeSections={accordionState.activeSections}
                 sections={content}
@@ -110,6 +127,7 @@ function PokemonAccordion(props){
                 expandMultiple={false}
                 renderHeader={renderHeader}
                 renderContent={renderContent}
+                renderFooter={renderFooter}
                 duration={400}
                 onChange={setSections}
             />
@@ -123,25 +141,46 @@ const styles = StyleSheet.create({
         backgroundColor: colors.primary,
         paddingTop: 20 
     },
-    header: {
-        padding: 10,
-    },
     headerText: {
         textAlign: 'center',
         fontSize: 20,
         fontWeight: '500',
     },
+    sectionHeader: {
+        marginTop:5,
+        marginHorizontal:5,
+
+        borderTopWidth: 1,    
+        borderStartWidth: 1,
+        borderEndWidth: 1,
+        borderColor: 'black',
+        borderTopStartRadius:dimens.headerFooterRadius,
+        borderTopEndRadius:dimens.headerFooterRadius,
+
+    },
     sectionContent: {
-        borderRadius: 20,
-        padding: 20,
-        backgroundColor: colors.secondary,
+        marginHorizontal:5,
+
+        borderLeftWidth: 1,
+        borderRightWidth: 1,
+        borderColor: 'black',
+
+        padding: 10,
     },
-    activeHeader: {
-        backgroundColor: colors.secondary,
+
+    sectionFooter: {
+        marginHorizontal:5,
+        marginBottom:5,
+
+        height:20, 
+        borderBottomWidth: 1,    
+        borderStartWidth: 1,
+        borderEndWidth: 1,
+        borderColor: 'black',
+        borderBottomStartRadius:dimens.headerFooterRadius,
+        borderBottomEndRadius:dimens.headerFooterRadius,
     },
-    inactiveHeader: {
-        backgroundColor: colors.primary,
-    },
+
 });
 
 export default PokemonAccordion;
