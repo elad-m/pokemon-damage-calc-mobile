@@ -85,8 +85,10 @@ function Item(props){
                 Keyboard.dismiss();
                 setResultsVisible(false);
             }}
-        >
+        ><View>
             <Text style={styles.textListItem}>{item.name}</Text>
+            {item.more && <Text style={styles.textListItem}>{item.more}</Text>}
+        </View>
         </Pressable>
   );
 }
@@ -94,7 +96,8 @@ function Item(props){
 
 function ItemResultsModalList(props){
     const renderItem = ({ item }) => (
-        <Item 
+        <Item
+            key={item.name} 
             item={item}
             setSearchText={props.setSearchText}
             setResultsVisible={props.setResultsVisible}
@@ -121,7 +124,7 @@ function ItemResultsModalList(props){
                                 ItemSeparatorComponent={ListSeparator}
                                 data={props.queryResults}
                                 renderItem={renderItem}
-                                keyExtractor={(item) => item.id}
+                                keyExtractor={(item) => item.id.toString()}
                             />
                         </SafeAreaView>
                         <View style={styles.resultsListButtonsRowView}>
@@ -130,16 +133,9 @@ function ItemResultsModalList(props){
                                 android_ripple={{radius: 10}}
                                 onPress={() => {
                                     props.setResultsVisible(false);
-                                    props.setSearchText(props.selected.name);
+                                    props.setSearchText(props.selected.name || props.selected);
                                 }}
-                                style={({pressed}) => [
-                                    {
-                                        opacity: pressed? 
-                                        0.5:
-                                        1
-                                    },
-                                        styles.pressableWrapper
-                                ]}>
+                                style={styles.pressableWrapper}>
                                 <Text style={styles.pressableInnerText}>
                                     Done
                                 </Text>
@@ -160,15 +156,12 @@ function ItemResultsModalList(props){
 }
 
 function ModalSelector(props){
-    
+    const {containerFlex} = props;
     const [searchText, setSearchText] = useState('');
     const [queryResults, setQueryResults] = useState(props.allResults);
     const [areResultsVisible, setResultsVisible] = useState(false);
-
-    // console.log(`Selector: item: ${props.selected.name}\tqueryRes[0]: ${getQueryItem(queryResults, props.itemType, props.allPokemonData).name}\ttext: ${props.itemText}`);
-  
     return (
-        <View style={styles.modalSelectorContainer}>
+        <View style={{...styles.modalSelectorContainer, flex: containerFlex}}>
             <ItemResultsModalList
                 {...props} // all, default and query function
                 searchText={searchText}
@@ -187,7 +180,7 @@ function ModalSelector(props){
                     {opacity: pressed? 0.5 : 1}, {...styles.pressableWrapper, flex:0}
                     ]}>
                 <Text style={{...styles.pressableInnerText, fontSize: props.selectorFontSize}}>
-                    {props.selected.name}
+                    {props.selected.name || props.selected}
                 </Text>
             </Pressable>
         </View>
@@ -196,7 +189,7 @@ function ModalSelector(props){
 
 const styles = StyleSheet.create({
     modalSelectorContainer: {
-        flex:1,
+        flex:0,
         alignItems:'center',
     },
     pressableWrapper:{

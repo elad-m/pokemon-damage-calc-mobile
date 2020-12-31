@@ -7,13 +7,15 @@ function getDefaultEvs(){
     return {'hp': 0, 'atk':0, 'def':0, 'spa':0, 'spd':0, 'spe':0};
 }
 
-function PokemonSet(ofPokemon, ofMove, ofIvs=getDefaultIvs(), ofEvs=getDefaultEvs())  {
+function PokemonSet(ofPokemon, ofMove, ofItem, ofNature, ofIvs=getDefaultIvs(), ofEvs=getDefaultEvs())  {
     let pokemon= ofPokemon;
     let moves =  ofMove;
+    let item = ofItem;
+    let nature = ofNature;
     let ivs = ofIvs;
     let evs = ofEvs;
 
-    return {pokemon, moves, ivs, evs}
+    return {pokemon, moves, item, nature, ivs, evs}
 }
 
 module.exports = PokemonSet;

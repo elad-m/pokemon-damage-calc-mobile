@@ -6,17 +6,22 @@ import colors from '../config/colors';
 import ErrorBoundary from '../ErrorBoundary';
 
 // returns a number from text between min and max, 0 if not a number
-function sanitizeTextInput(text, min ,max){
+function sanitizeTextInput(statEntries, text, min ,max, maxSum, useMaxSum){
     const parsed = parseInt(text);
-    return isNaN(parsed)? 
-            0: 
+    const minMaxSanitized =  isNaN(parsed)? 0: 
             (parsed < min? min
                 : (parsed > max? max:
                     parsed));
+    const currentSum = Object.values(statEntries).reduce((pv, cv) => pv + cv, 0);
+    const sumSanitized = useMaxSum? 
+        ((currentSum + minMaxSanitized > maxSum)? (maxSum - currentSum) : minMaxSanitized) :
+        minMaxSanitized;
+    return sumSanitized;
 }
 
 function NumberTextInput(props){
-    const {minValue, maxValue, entryKey, statEntries, setStatEntries} = props;
+    const {minValue, maxValue, entryKey, statEntries, setStatEntries, 
+        maxSum, useMaxSum} = props;
 
     const [inputText, setInputText] = useState(statEntries[entryKey].toString());
     useEffect(() => {
@@ -32,11 +37,12 @@ function NumberTextInput(props){
                     selectTextOnFocus={true}
                     keyboardType={'numeric'}      
                     onChangeText={text => {
-                        const parsedNumber = sanitizeTextInput(text, minValue, maxValue);
+                        const parsedNumber = sanitizeTextInput(statEntries, text, minValue, maxValue, maxSum, useMaxSum);
+                        // setting values here causes problems/complications with sum verifying
                         setInputText(parsedNumber.toString());
                     }}
                     onSubmitEditing={e => {
-                        const parsedNumber = sanitizeTextInput(inputText, minValue, maxValue);
+                        const parsedNumber = sanitizeTextInput(statEntries, inputText, minValue, maxValue, maxSum, useMaxSum);
                         const newValues = {...statEntries};
                         newValues[entryKey] = parsedNumber;
                         setStatEntries(newValues);
@@ -51,7 +57,6 @@ function NumberTextInput(props){
 
 const styles = StyleSheet.create({
     tableColumn: {
-        flex:1,
         backgroundColor: colors.pressable,    
     },
     tableCell: {

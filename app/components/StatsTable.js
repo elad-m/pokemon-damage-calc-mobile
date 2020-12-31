@@ -6,14 +6,33 @@ import colors from '../config/colors';
 
 const STAT_FIELDS = {hp: "HP", atk: "Atk", def: "Def", spa: "Sp. Atk", spd: "Sp. Def", spe: "Speed"};
 
-function calcStat(stat, base, iv, ev, level=100){
+
+function getNatureCoefficient(stat, nature){
+    let rawSplit = nature.more.split(/\W+/i);
+    let boosted = rawSplit[1]; // just how it splits, say (+atk,-def)
+    let nerfed = rawSplit[2];
+    let natureCoefficient = 1;
+    if(boosted === nerfed){
+        natureCoefficient = 1;
+    } else if (boosted === stat){
+        natureCoefficient = 1.1;
+    } else if (nerfed === stat){
+        natureCoefficient = 0.9;
+    } else {
+        natureCoefficient = 1;
+    }
+    return natureCoefficient;
+    
+}
+
+function calcStat(stat, base, iv, ev, nature, level=50){
+    const natureCoefficient = getNatureCoefficient(stat, nature);
     if (stat === 'hp') {
         return base === 1
             ? base
             : Math.floor(((base * 2 + iv + Math.floor(ev / 4)) * level) / 100) + level + 10;
     } else {
-        const n = 1.0;
-        return Math.floor((Math.floor(((base * 2 + iv + Math.floor(ev / 4)) * level) / 100) + 5) * n).toString();
+        return Math.floor((Math.floor(((base * 2 + iv + Math.floor(ev / 4)) * level) / 100) + 5) * natureCoefficient).toString();
 }
 }
 
@@ -43,7 +62,7 @@ function ConstantTableColumn(props) {
     );
 }
 
-function getInputCells(statEntries, setStatEntries, maxValue){
+function getInputCells(statEntries, setStatEntries, maxValue, maxSum, useMaxSum){
     return Object.entries(statEntries).map(([key, value]) => {
         return (
             <NumberTextInput
@@ -51,6 +70,8 @@ function getInputCells(statEntries, setStatEntries, maxValue){
                 entryKey={key}
                 minValue={0}
                 maxValue={maxValue}
+                maxSum={maxSum}
+                useMaxSum={useMaxSum}
                 statEntries={statEntries}
                 setStatEntries={setStatEntries}
             />
@@ -59,7 +80,8 @@ function getInputCells(statEntries, setStatEntries, maxValue){
 }
 
 function InputableTableColumn(props) {
-    const cells = getInputCells(props.values, props.setValues, props.maxValue);
+    const cells = getInputCells(props.values, props.setValues, props.maxValue,
+        props.maxSum, props.useMaxSum);
     return (
         <View style={styles.tableColumn}>
             <Text style={styles.tableCell}>
@@ -86,19 +108,16 @@ function FinalTableColumn(props) {
 }
 
 function StatsTable(props){
-    const {pokemon, ivs, setIvs, evs, setEvs} = props; 
+    const {pokemon, ivs, setIvs, evs, setEvs, nature} = props; 
     const baseStats = pokemon.baseStats;
     const [finalValues, setFinalValues] = useState(
         Object.assign({}, ...Object.keys(baseStats)
-                .map(k => ({[k]: calcStat(k, baseStats[k], ivs[k], evs[k])})))
+                .map(k => ({[k]: calcStat(k, baseStats[k], ivs[k], evs[k], nature)})))
     );
     useEffect(() => {
         setFinalValues(Object.assign({}, ...Object.keys(baseStats)
-                    .map(k => ({[k]: calcStat(k, baseStats[k], ivs[k], evs[k])}))));
-    },[ivs, evs]);
-    // console.log(`base: ${Object.values(baseStats)} \
-    // ivs: ${Object.entries(ivs)} evs: ${Object.values(evs)} \
-    // fins: ${Object.values(finalValues)}`);
+                    .map(k => ({[k]: calcStat(k, baseStats[k], ivs[k], evs[k], nature)}))));
+    },[ivs, evs, nature]);
     return (
         <View style={styles.table}>
             
@@ -118,6 +137,8 @@ function StatsTable(props){
                 setValues={setIvs}
                 statName={'IVs'}
                 maxValue={31}
+                maxSum={186} // could be any value
+                useMaxSum={false}
             />
 
             <InputableTableColumn
@@ -125,6 +146,8 @@ function StatsTable(props){
                 setValues={setEvs}
                 statName={'EVs'}
                 maxValue={252}
+                maxSum={510}
+                useMaxSum={true}
             />
             <FinalTableColumn
                 finalValues={finalValues}
@@ -138,14 +161,12 @@ function StatsTable(props){
 const styles = StyleSheet.create({
     table: {
         flexDirection:'row',
-        justifyContent:'space-around',        
+        justifyContent:'space-around',
     },
     tableColumn: {
         flex:1,
-        justifyContent:'space-around',
+        justifyContent: 'space-around',
         backgroundColor: colors.pressable,
-        borderBottomStartRadius:5,
-        borderTopStartRadius:5,
     },
     tableCell: {
         fontSize:15,
@@ -154,7 +175,6 @@ const styles = StyleSheet.create({
         padding:5,
     },
     inputCell: {
-        
         backgroundColor: 'white',
         borderColor:'black',
         borderWidth:1,
