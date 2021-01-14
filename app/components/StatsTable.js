@@ -160,6 +160,7 @@ function StatsTable(props){
 
 const styles = StyleSheet.create({
     table: {
+        flex:0,
         flexDirection:'row',
         justifyContent:'space-around',
     },

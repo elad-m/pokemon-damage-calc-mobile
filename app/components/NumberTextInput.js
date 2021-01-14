@@ -3,7 +3,6 @@ import React, {useEffect, useState} from 'react';
 import {TextInput, View, StyleSheet } from 'react-native';
 
 import colors from '../config/colors';
-import ErrorBoundary from '../ErrorBoundary';
 
 // returns a number from text between min and max, 0 if not a number
 function sanitizeTextInput(statEntries, text, min ,max, maxSum, useMaxSum){
@@ -30,27 +29,25 @@ function NumberTextInput(props){
 
     return (
         <View style={styles.tableColumn}>
-            <ErrorBoundary>
-                <TextInput
-                    style={[styles.inputCell, styles.tableCell]}
-                    maxLength={3}
-                    selectTextOnFocus={true}
-                    keyboardType={'numeric'}      
-                    onChangeText={text => {
-                        const parsedNumber = sanitizeTextInput(statEntries, text, minValue, maxValue, maxSum, useMaxSum);
-                        // setting values here causes problems/complications with sum verifying
-                        setInputText(parsedNumber.toString());
-                    }}
-                    onSubmitEditing={e => {
-                        const parsedNumber = sanitizeTextInput(statEntries, inputText, minValue, maxValue, maxSum, useMaxSum);
-                        const newValues = {...statEntries};
-                        newValues[entryKey] = parsedNumber;
-                        setStatEntries(newValues);
-                        setInputText(parsedNumber.toString());
-                    }}
-                    value={inputText}      
-                />
-            </ErrorBoundary>
+            <TextInput
+                style={[styles.inputCell, styles.tableCell]}
+                maxLength={3}
+                selectTextOnFocus={true}
+                keyboardType={'numeric'}      
+                onChangeText={text => {
+                    const parsedNumber = sanitizeTextInput(statEntries, text, minValue, maxValue, maxSum, useMaxSum);
+                    // setting values here causes problems/complications with sum verifying
+                    setInputText(parsedNumber.toString());
+                }}
+                onSubmitEditing={e => {
+                    const parsedNumber = sanitizeTextInput(statEntries, inputText, minValue, maxValue, maxSum, useMaxSum);
+                    const newValues = {...statEntries};
+                    newValues[entryKey] = parsedNumber;
+                    setStatEntries(newValues);
+                    setInputText(parsedNumber.toString());
+                }}
+                value={inputText}      
+            />
         </View>
     );
 }

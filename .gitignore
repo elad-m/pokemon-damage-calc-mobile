@@ -8,7 +8,6 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
-app/components/TestModal.js
 
 # macOS
 .DS_Store

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { 
+    KeyboardAvoidingView,
     Dimensions,
     Modal,
     Pressable,
@@ -10,6 +11,8 @@ import {
     Text, 
     View, 
     Keyboard,} from 'react-native';
+
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 import colors from '../config/colors';
 
@@ -27,8 +30,8 @@ function ClearButton(props){
     }
     return (
         <Pressable
-            android_ripple={{radius: 10}} 
             style={[styles.pressableWrapper, styles.clearButton, !(searchText)? styles.clearButtonOpaque: styles.clearButton]}
+            activeOpacity={0.3}
             onPress={handleClear}>
             <Text style={styles.pressableInnerText}>Clear</Text>
         </Pressable>
@@ -42,7 +45,11 @@ function ItemPickerTextInput(props){
         queryResults, setQueryResults, 
         areResultsVisible, setResultsVisible} = props;
     return (
-        <View style={styles.modalSelectorTextInputContainer}>
+        <KeyboardAwareScrollView
+        resetScrollToCoords={{ x: 0, y: 0 }}
+        contentContainerStyle={styles.modalSelectorTextInputContainer}
+        scrollEnabled={false}
+        >
             <TextInput 
                 style={styles.modalSelectorTextInput}
                 maxLength={20}
@@ -64,7 +71,7 @@ function ItemPickerTextInput(props){
                 }}
                 value={searchText}
             />
-        </View>
+        </KeyboardAwareScrollView>
     );
 }
 
@@ -78,7 +85,6 @@ function Item(props){
                 {opacity: pressed? 0.5 : 1}, styles.pressableWrapper
             ]}
             activeOpacity={0.3}
-            underlayColor={'black'}
             onPress={() => {
                 setSelected(item);
                 setSearchText(item.name);
@@ -104,43 +110,40 @@ function ItemResultsModalList(props){
             setSelected={props.setSelected}
         />
     );
-    function ListSeparator(){
-        return (<View style={{height: 1, backgroundColor: colors.titleText}}/>);
-    }
     return (
-        <SafeAreaView >
+        <SafeAreaView>
             <Modal
-                transparent={true}
+                transparent={false}
                 animationType="slide"
                 visible={props.areResultsVisible}>
                 <View style={{...styles.centeredView, }} >
-                    <View style={{...styles.modalView, }} >
-                        <ItemPickerTextInput
-                            {...props}        
-                        />
-                        <SafeAreaView style={styles.resultsFlatListContainer} >
+                    <View style={{...styles.modalView, }}>
+                        <View style={styles.resultsFlatListContainer} >
+                            <ItemPickerTextInput
+                                {...props}        
+                            />
                             <FlatList
                                 keyboardShouldPersistTaps='handled' // so that list items are pressable when keyboard up
-                                ItemSeparatorComponent={ListSeparator}
                                 data={props.queryResults}
                                 renderItem={renderItem}
-                                keyExtractor={(item) => item.id.toString()}
-                            />
-                        </SafeAreaView>
+                                keyExtractor={(item) => item.id.toString()}/>
+                        </View>
                         <View style={styles.resultsListButtonsRowView}>
                             {/* Done Button*/}
                             <Pressable
+                                style={styles.pressableWrapper}
+                                style={({pressed}) => [{opacity: pressed? 0.5 : 1}, styles.pressableWrapper]}
+                                activeOpacity={0.3}
                                 android_ripple={{radius: 10}}
                                 onPress={() => {
                                     props.setResultsVisible(false);
                                     props.setSearchText(props.selected.name || props.selected);
                                 }}
-                                style={styles.pressableWrapper}>
+                                >
                                 <Text style={styles.pressableInnerText}>
                                     Done
                                 </Text>
-                            </Pressable>
-                                
+                            </Pressable> 
                             <ClearButton
                                 allResults={props.allResults}
                                 searchText={props.searchText}
@@ -148,20 +151,22 @@ function ItemResultsModalList(props){
                                 setQueryResults={props.setQueryResults}
                             />
                         </View>
-                    </View>
-                </View>    
+                    </View>    
+                </View>
             </Modal>
         </SafeAreaView>
     );
 }
 
-function ModalSelector(props){
+function SearchableModalSelector(props){
     const {containerFlex} = props;
     const [searchText, setSearchText] = useState('');
     const [queryResults, setQueryResults] = useState(props.allResults);
     const [areResultsVisible, setResultsVisible] = useState(false);
     return (
-        <View style={{...styles.modalSelectorContainer, flex: containerFlex}}>
+        <View style={{...styles.modalSelectorContainer, 
+            flex: containerFlex
+        }}>
             <ItemResultsModalList
                 {...props} // all, default and query function
                 searchText={searchText}
@@ -175,10 +180,9 @@ function ModalSelector(props){
                 onPress={() => {
                     setResultsVisible(true);
                 }}
-                style={{...styles.pressableWrapper, flex:0}}
-                style={({pressed}) => [
-                    {opacity: pressed? 0.5 : 1}, {...styles.pressableWrapper, flex:0}
-                    ]}>
+                style={{...styles.pressableWrapper,flex:0}}
+                style={({pressed}) => [{opacity: pressed? 0.5 : 1}, {...styles.pressableWrapper,flex:0}]}
+                activeOpacity={0.3}>
                 <Text style={{...styles.pressableInnerText, fontSize: props.selectorFontSize}}>
                     {props.selected.name || props.selected}
                 </Text>
@@ -189,11 +193,12 @@ function ModalSelector(props){
 
 const styles = StyleSheet.create({
     modalSelectorContainer: {
-        flex:0,
+        flex:1,
+        justifyContent:'center',
         alignItems:'center',
     },
     pressableWrapper:{
-        flex:1, 
+        flex:1,
         alignSelf:'stretch',
         backgroundColor: colors.pressable,
         margin:5,
@@ -217,7 +222,6 @@ const styles = StyleSheet.create({
     },
     resultsListButtonsRowView:{
         flexDirection:'row', 
-        justifyContent:'flex-start',
         backgroundColor:colors.header,
         borderBottomEndRadius:10,
         borderBottomStartRadius:10,
@@ -233,6 +237,7 @@ const styles = StyleSheet.create({
         padding:10,
     },
     modalView: {
+        justifyContent: 'center',
         backgroundColor:colors.primary,
         borderRadius: 10,
 
@@ -260,7 +265,7 @@ const styles = StyleSheet.create({
         borderRadius:10,
     },
     resultsFlatListContainer: {    
-        height:Dimensions.get('window').height*0.4,
+        height:Dimensions.get('window').height*0.5,
     },
     textListItem: {
         padding:10,
@@ -271,4 +276,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default ModalSelector;
+export default SearchableModalSelector;

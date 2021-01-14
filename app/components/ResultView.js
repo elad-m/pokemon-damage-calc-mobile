@@ -36,7 +36,7 @@ function ArrowPressable(props){
             <Svg
                 height={'100'} width={'200'} 
                 viewBox={viewBox} 
-                stroke={colors.header}
+                stroke={colors.titleText}
                 >
                 <G >                
                     <Polygon
@@ -91,7 +91,7 @@ function ResultView(props){
     return(
         <View style={{...styles.resultContainer}}>
             <Text style={{...styles.titleText, 
-            color:'white', fontWeight:'bold', 
+            color:colors.titleText, fontWeight:'bold', 
             backgroundColor:colors.header,}}>
                 {'Result'}
             </Text>
@@ -105,9 +105,11 @@ function ResultView(props){
                 setResultToShow={setResultToShow}
             />
 
-            <Pressable 
-                onPress={toggleExpanded}
-                style={{...styles.pressableWrapper, flex:0}}>
+            {/* <Pressable 
+                style={{...styles.pressableWrapper, flex:0}}
+                style={({pressed}) => [{opacity: pressed? 0.5 : 1}, styles.pressableWrapper]}
+                activeOpacity={0.3}
+                onPress={toggleExpanded}>
                 <Text style={{...styles.pressableInnerText}}>
                     Spread/Collapse
                 </Text>
@@ -119,7 +121,7 @@ function ResultView(props){
                     Collapsed Text{'\n'}
                     Collapsed Text{'\n'}
                 </Text>
-            </Collapsible>
+            </Collapsible> */}
         </View>
 );
 }

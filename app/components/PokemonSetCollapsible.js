@@ -12,21 +12,27 @@ import {
 
 import Collapsible from 'react-native-collapsible/Collapsible';
 
-import ModalSelector from './ModalSelector';
+import SearchableModalSelector from './SearchableModalSelector';
 import MoveRow from './MoveRow';
-import StatsTable from './StatsTable';
 import PokemonSetDetails from './PokemonSetDetails';
+import PressableToModal from './PressableToModal';
 
 import colors from '../config/colors';
 import dimens from '../config/dimens';
+import IORow from './IORow';
 
 const jsdom = require('jsdom-jscore-rn');
 
 function SetHeader(props){
-    const {allPokemonData, pokemonSet, dispatchPokemon, pokemonNumber} = props;
+    const {allPokemonData, databaseService, pokemonSet, dispatchPokemon, pokemonNumber, navigation} = props;
     return (
         <View style={styles.sectionHeader}>
-            <ModalSelector
+            <IORow
+                databaseService={databaseService}
+                pokemonSet={pokemonSet}
+                dispatchPokemon={dispatchPokemon}
+            />
+            <SearchableModalSelector
                 selected={pokemonSet.pokemon}
                 setSelected={(payload) => dispatchPokemon({type: 'changePokemon', payload:payload})}
                 queryFunction={(query) => allPokemonData.pokedexPerGen.filter(pokemon =>  pokemon.name.startsWith(query))}
@@ -42,8 +48,8 @@ function SetHeader(props){
                 move={pokemonSet.moves}
                 isInResult={pokemonNumber === 1}
                 >
-                <ModalSelector
-                    containerFlex={1}
+                <SearchableModalSelector
+                    containerFlex={2}
                     selected={pokemonSet.moves}
                     setSelected= {(payload) => dispatchPokemon({type: 'changeMove', payload:payload})}
                     queryFunction={(query) => allPokemonData.movesPerGen.filter(move =>  move.name.startsWith(query))}
@@ -103,32 +109,14 @@ function Footer(){
 }
 
 function PokemonSetCollapsible(props){
-    const {allPokemonData, pokemonSet, dispatchPokemon, pokemonNumber} =props;
-    const [collapsibleState, setCollapsibleState] = useState(true);
-    const toggleExpanded = () => {
-        setCollapsibleState((!collapsibleState));
-    };
+    const {allPokemonData, pokemonSet, dispatchPokemon} =props;
 
     return (
         <View style={styles.setContainer}> 
             <SetHeader
-                allPokemonData={allPokemonData}
-                pokemonSet={pokemonSet}
-                dispatchPokemon={dispatchPokemon}
-                pokemonNumber={pokemonNumber}>
-                <Pressable 
-                    style={styles.pressableWrapper}
-                    android_ripple={{radius: dimens.defaultBorderRadius}}
-                    onPress={toggleExpanded}>
-                    <Text style={styles.pressableInnerText}>More</Text>
-                </Pressable>
+                {...props}>
             </SetHeader>
-            {collapsibleState && <Footer/>}
-            <Collapsible
-                // all grandchildren of collapsible must have flex:0
-                duration={300}
-                style={{flex: 1, }}
-                collapsed={collapsibleState}>
+            <PressableToModal>
                 <PokemonSetDetails 
                     containerStyle={styles.sectionContent}
                     titleTextViewStyle={styles.titleTextView}
@@ -137,9 +125,8 @@ function PokemonSetCollapsible(props){
                     items={allPokemonData.itemsPerGen}
                     natures={allPokemonData.natures}
                     />
-
-                <Footer/>
-            </Collapsible>
+            </PressableToModal>
+            <Footer/>
         </View>
     );
 }
@@ -167,13 +154,8 @@ const styles = StyleSheet.create({
     },
     sectionContent: {
         flex:1,
-        justifyContent:'space-around',
         alignItems:'stretch',
         padding: 10,
-
-        borderLeftWidth: 1,
-        borderRightWidth: 1,
-        borderColor: 'black',
     },
     sectionFooter: {
         height:20, 
@@ -213,7 +195,7 @@ const styles = StyleSheet.create({
     },
     pressableInnerText:{
         textAlign:'center',
-        fontSize: 10,  
+        fontSize: 12,  
         padding: 8,
     },
 

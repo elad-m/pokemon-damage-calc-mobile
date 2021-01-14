@@ -1,39 +1,24 @@
 import React from 'react';
 import {
-    StyleSheet,
+    Text,
+    Pressable,
     View
 } from 'react-native';
-import dimens from '../config/dimens';
+
 import RowWrapper from './RowWrapper';
-import ModalSelector from './ModalSelector';
-import TestModal from './TestModal';
+import SearchableModalSelector from './SearchableModalSelector';
 import StatsTable from './StatsTable';
 
 function PokemonSetDetails(props){
-    const {pokemonSet, dispatchPokemon, titleTextViewStyle,containerStyle, 
+    const {pokemonSet, dispatchPokemon, titleTextViewStyle, containerStyle, 
         items, natures} = props;
     return (
-        <View style={containerStyle}> 
-            <RowWrapper
-                titleTextViewStyle={titleTextViewStyle}
-                titleFontSize={17}
-                message={`Item: `}>
-                <ModalSelector
-                    containerFlex={1}
-                    selected={pokemonSet.item}
-                    setSelected= {(payload) => dispatchPokemon({type: 'changeItem', payload:payload})}
-                    queryFunction={(query) => items.filter(item =>  item.name.startsWith(query))}
-                    allResults={items}
-                    defaultSelection={items[0]}
-                    message={'Item'}
-                    selectorFontSize={17}
-                />
-            </RowWrapper>
+        <View style={containerStyle}>
             <RowWrapper
                 titleTextViewStyle={titleTextViewStyle}
                 titleFontSize={17}
                 message={`Nature: `}>
-                <ModalSelector
+                <SearchableModalSelector
                     containerFlex={1}
                     selected={pokemonSet.nature}
                     setSelected= {(payload) => dispatchPokemon({type: 'changeNature', payload:payload})}
@@ -44,6 +29,22 @@ function PokemonSetDetails(props){
                     selectorFontSize={17}
                 />
             </RowWrapper>
+            <RowWrapper
+                titleTextViewStyle={titleTextViewStyle}
+                titleFontSize={17}
+                message={`Item: `}>
+                <SearchableModalSelector
+                    containerFlex={1}
+                    selected={pokemonSet.item}
+                    setSelected= {(payload) => dispatchPokemon({type: 'changeItem', payload:payload})}
+                    queryFunction={(query) => items.filter(item =>  item.name.startsWith(query))}
+                    allResults={items}
+                    defaultSelection={items[0]}
+                    message={'Item'}
+                    selectorFontSize={17}
+                />
+            </RowWrapper>
+
             <StatsTable
                 pokemon={pokemonSet.pokemon}
                 nature={pokemonSet.nature}

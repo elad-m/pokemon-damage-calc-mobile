@@ -4,7 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import MainScreen from './app/screens/MainScreen';
-import SetScreen from './app/screens/SetScreen';
+import SavedSetsScreen from './app/screens/SavedSetsScreen';
 import colors from './app/config/colors';
 
 const Stack = createStackNavigator();
@@ -27,7 +27,15 @@ export default function App() {
 					},
 				}}
 			/>
-			<Stack.Screen name="Set" component={SetScreen} />
+			<Stack.Screen 
+				name="SavedSets" 
+				component={SavedSetsScreen}
+				options={{
+					title: 'Saved Sets',
+					headerStyle: {
+						backgroundColor: colors.header,
+					},
+				}} />
 			</Stack.Navigator>
 		</NavigationContainer>
 	);

@@ -5,11 +5,13 @@ function RowWrapper(props){
     const {message, titleTextViewStyle, titleFontSize} = props;
     return(
         <View style={styles.rowContainer}>
-            <View style={titleTextViewStyle}>
-                <Text style={{...styles.textStyle, fontSize:titleFontSize}}>
-                    {message} 
-                </Text>
-            </View>
+                {message && 
+                <View style={titleTextViewStyle}>
+                    <Text style={{...styles.textStyle, fontSize:titleFontSize}}>
+                        {message} 
+                    </Text>
+                </View>
+                }
             {props.children}
         </View>
     );
@@ -19,7 +21,7 @@ const styles = StyleSheet.create({
     rowContainer: {
         flex: 0,
         flexDirection:'row',
-        justifyContent:'space-between',
+        justifyContent:'center',
         padding:5,
     },
     textStyle:{

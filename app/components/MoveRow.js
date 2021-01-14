@@ -3,9 +3,8 @@ import {Text, View, StyleSheet } from 'react-native';
 
 function MoveRow(props){
     const {move, message, titleTextViewStyle, titleFontSize} = props;
-    // console.log(move);
     return(
-        <View style={styles.RowContainer}>
+        <View style={styles.rowContainer}>
             <View style={titleTextViewStyle}>
                 <Text style={{...styles.textStyle, fontSize: titleFontSize}}>
                     {message} 
@@ -28,7 +27,7 @@ function MoveRow(props){
 }
 
 const styles = StyleSheet.create({
-    RowContainer: {
+    rowContainer: {
         flex: 1,
         flexDirection:'row',
         justifyContent:'space-around',

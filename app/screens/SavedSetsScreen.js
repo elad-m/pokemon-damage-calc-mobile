@@ -1,15 +1,23 @@
 import React from 'react';
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import { Keyboard } from 'react-native'
+import * as SQLite from 'expo-sqlite';
 
+const db  = SQLite.openDatabase('pokemonSets.db');
 
-function SetScreen(props) {
-    // Keyboard.dismiss();
-    const pokemon = props.route.params;
+function SavesSetsScreen({navigation, route}) {
+    const pokemonSet = route.params.pokemonSet;
     return (
         <SafeAreaView style={styles.mainView}>
             <Text style={styles.titleText}>
-                Text For Testing
+                Choose a set
+            </Text>
+            <Text style={styles.innerText}>
+                {pokemonSet.pokemon.name} {'\n'}
+                {pokemonSet.moves.name}{'\n'}
+                {pokemonSet.item.name}{'\n'}
+                {pokemonSet.nature.name}{'\n'}
+                {JSON.stringify(pokemonSet.evs)}{'\n'}
+                {JSON.stringify(pokemonSet.ivs)}
             </Text>
         </SafeAreaView>
         
@@ -37,4 +45,4 @@ const styles = StyleSheet.create({
     },    
 })
 
-export default SetScreen;
+export default SavesSetsScreen;

@@ -1,4 +1,3 @@
-
 import React, {useEffect, useReducer, useState } from 'react';
 import { 
     View,
@@ -6,71 +5,33 @@ import {
     SafeAreaView,
     StyleSheet,
     ScrollView,
+    Pressable,
      } from 'react-native';
 
 import colors from '../config/colors';
 
 import ResultView from '../components/ResultView';
 import PokemonSetCollapsible from '../components/PokemonSetCollapsible';
+import DatabaseService from '../services/DatabaseService';
+import PokemonDataService from '../services/PokemonDataService'
 
-
-const  {calculate, Generations, Pokemon, Move, NATURES, ITEMS} = require('@smogon/calc') ;
 const PokemonSet = require('../models/pokemonSet');
 
 let currentGeneration = 7;
-const GEN = Generations.get(currentGeneration); 
-
-function getAllPokemonData(gen) {
-    const pokedexPerGen = Array.from(gen.species).sort((a, b) => a.name > b.name);
-    const defaultPokemon = pokedexPerGen[0];
-    
-    const movesPerGenWithNoMove = Array.from(gen.moves).sort((a, b) => a.name > b.name);
-    movesPerGenWithNoMove.shift();
-    const movesPerGen = movesPerGenWithNoMove; 
-    const defaultMove = movesPerGen.find(move => move.name === 'Tackle');
-
-    const itemsPerGen = ITEMS[currentGeneration].map((o, i) => {return {"name":o , "id":i}});
-    const natures = Object.entries(NATURES).map((o,i) => {return {"name": `${o[0]}`, "more":`(+${o[1][0]},-${o[1][1]})`, "id":i}});
-
-    return {pokedexPerGen, 
-        defaultPokemon,
-        movesPerGen,
-        defaultMove,
-        itemsPerGen,
-        natures};
-};
-
-const allPokemonData = getAllPokemonData(GEN);
-
- function simpleCalculate(pokemonSet1, pokemonSet2){
-    const pokemon1 = new Pokemon(GEN, pokemonSet1.pokemon.name, {
-        evs: pokemonSet1.evs,
-        ivs: pokemonSet1.ivs,
-        level:50,
-        item:pokemonSet1.item.name,
-        nature: pokemonSet1.nature.name.split('(')[0]
-    });
-    const pokemon2 = new Pokemon(GEN, pokemonSet2.pokemon.name, {
-        evs: pokemonSet2.evs,
-        ivs: pokemonSet2.ivs,
-        level: 50,
-        item:pokemonSet2.item.name,
-        nature: pokemonSet2.nature.name.split('(')[0]
-    });
-    const pokemon1move = new Move(GEN, pokemonSet1.moves.name);
-    const pokemon2move = new Move(GEN, pokemonSet2.moves.name);
-
-    const result1 = calculate(GEN, pokemon1, pokemon2, pokemon1move);
-    const result2 = calculate(GEN, pokemon2, pokemon1, pokemon2move);
-
-    return [result1, result2];
-}
+const pokemonDataService = PokemonDataService(currentGeneration);
+const databaseService = DatabaseService(17);
+// // databaseService.deleteAll();
+databaseService.init();
 
 function pokemonSetReducer(state, action){
     const {pokemon, moves, item, nature, ivs, evs} = state;
     switch (action.type) {
+        case 'changeAll':{
+            const {pokemon, moves, item, nature, ivs, evs} = action.payload;
+            return new PokemonSet(pokemon, moves, item, nature, ivs, evs);
+        }
         case 'changePokemon':
-            return new PokemonSet(action.payload, allPokemonData.defaultMove, item, nature);
+            return new PokemonSet(action.payload, pokemonDataService.defaultMove, item, nature);
         case 'changeMove':
             return new PokemonSet(pokemon, action.payload, item, nature, ivs, evs);
         case 'changeIvs':
@@ -86,18 +47,20 @@ function pokemonSetReducer(state, action){
     }
 }
 
-function MainScreen(props) {
-    const defaultSet = new PokemonSet(allPokemonData.defaultPokemon, allPokemonData.defaultMove, 
-        allPokemonData.itemsPerGen[0], allPokemonData.natures[1]);
+
+function MainScreen({navigation}) {    
+    const defaultSet = new PokemonSet(pokemonDataService.defaultPokemon, pokemonDataService.defaultMove, 
+        pokemonDataService.itemsPerGen[0], pokemonDataService.natures[1]);
     const [pokemonSet1, dispatchPokemon1] = useReducer(pokemonSetReducer, defaultSet);
     const [pokemonSet2, dispatchPokemon2] = useReducer(pokemonSetReducer, defaultSet);
-    const [damageResults, setDamageResults] = useState(simpleCalculate(pokemonSet1, pokemonSet2));
+    const [damageResults, setDamageResults] = useState(pokemonDataService.simpleCalculate(pokemonSet1, pokemonSet2));
     const [resultToShow, setResultToShow] = useState(0);
     
     useEffect(() => {
-        setDamageResults(simpleCalculate(pokemonSet1, pokemonSet2));
+        setDamageResults(pokemonDataService.simpleCalculate(pokemonSet1, pokemonSet2));
         console.log(`MAIN: ${pokemonSet1.pokemon.name} ${pokemonSet1.moves.name} ${pokemonSet1.item.name} ${pokemonSet1.nature.name}\
          ${pokemonSet2.pokemon.name} ${pokemonSet2.moves.name} ${pokemonSet2.item.name} ${pokemonSet2.nature.name}`);
+         
     }, [pokemonSet1, pokemonSet2]);
     
     return (
@@ -107,10 +70,12 @@ function MainScreen(props) {
                 keyboardShouldPersistTaps={'always'}
             >                
                 <PokemonSetCollapsible 
-                    allPokemonData={allPokemonData}
+                    allPokemonData={pokemonDataService}
+                    databaseService={databaseService}
                     pokemonSet={pokemonSet1}
                     dispatchPokemon={dispatchPokemon1}
                     pokemonNumber={1}
+                    navigation={navigation}
                 />
                 <ResultView
                     textStyle={styles.titleText}
@@ -119,10 +84,12 @@ function MainScreen(props) {
                     setResultToShow={setResultToShow}
                 />
                 <PokemonSetCollapsible 
-                    allPokemonData={allPokemonData}
+                    allPokemonData={pokemonDataService}
+                    databaseService={databaseService}
                     pokemonSet={pokemonSet2}
                     dispatchPokemon={dispatchPokemon2}
                     pokemonNumber={2}
+                    navigation={navigation}
                 />
 
             </ScrollView>
