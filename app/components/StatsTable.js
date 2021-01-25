@@ -3,6 +3,8 @@ import {TextInput, Text, View, StyleSheet } from 'react-native';
 
 import NumberTextInput from './NumberTextInput';
 import colors from '../config/colors';
+import { useContext } from 'react';
+import ThemeContext from '../config/ThemeContext';
 
 const STAT_FIELDS = {hp: "HP", atk: "Atk", def: "Def", spa: "Sp. Atk", spd: "Sp. Def", spe: "Speed"};
 
@@ -36,11 +38,11 @@ function calcStat(stat, base, iv, ev, nature, level=50){
 }
 }
 
-function getCells(statEntries){
+function getCells(statEntries, textColor){
     return Object.entries(statEntries).map(([key, value]) => {
         return (
             <Text 
-                style={styles.tableCell}
+                style={{...styles.tableCell, color:textColor}}
                 key={key}
             >
                 {value.toString()}
@@ -51,11 +53,12 @@ function getCells(statEntries){
 }
 
 function ConstantTableColumn(props) {
-    const cells = getCells(props.values);
+    const {values, style, statName, textColor} = props;
+    const cells = getCells(values, textColor);
     return (
-        <View style={props.style}>
-            <Text style={styles.tableCell}>
-                {props.statName}
+        <View style={style}>
+            <Text style={{...styles.tableCell, color:textColor}}>
+                {statName}
             </Text>
             {cells}
         </View>
@@ -84,7 +87,7 @@ function InputableTableColumn(props) {
         props.maxSum, props.useMaxSum);
     return (
         <View style={styles.tableColumn}>
-            <Text style={styles.tableCell}>
+            <Text style={{...styles.tableCell, color:props.textColor}}>
                 {props.statName}
             </Text>
             {cells} 
@@ -94,12 +97,10 @@ function InputableTableColumn(props) {
 
 function FinalTableColumn(props) {
     const {finalValues} = props;
-    const cells = getCells(finalValues);
+    const cells = getCells(finalValues, props.textColor);
     return (
-        <View style={{...styles.tableColumn, 
-            borderBottomEndRadius:10,
-            borderTopEndRadius:10,}}>
-            <Text style={styles.tableCell}>
+        <View style={styles.tableColumn}>
+            <Text style={{...styles.tableCell, color: props.textColor}}>
                 {props.statName}
             </Text>
             {cells}
@@ -108,6 +109,7 @@ function FinalTableColumn(props) {
 }
 
 function StatsTable(props){
+    const {theme} = useContext(ThemeContext);
     const {pokemon, ivs, setIvs, evs, setEvs, nature} = props; 
     const baseStats = pokemon.baseStats;
     const [finalValues, setFinalValues] = useState(
@@ -119,18 +121,19 @@ function StatsTable(props){
                     .map(k => ({[k]: calcStat(k, baseStats[k], ivs[k], evs[k], nature)}))));
     },[ivs, evs, nature]);
     return (
-        <View style={styles.table}>
+        <View style={{...styles.table, backgroundColor:theme.secondary,
+        borderColor:theme.divider}}>
             
             <ConstantTableColumn
               values={STAT_FIELDS}
               statName={'    '}
-              style={{...styles.tableColumn, 
-                borderBottomStartRadius:10,
-                borderTopStartRadius:10,}}/>
+              style={styles.tableColumn}
+              textColor={theme.secondaryText}/>
              <ConstantTableColumn
                 values={baseStats}
                 statName={'Base'}
-                style={styles.tableColumn}/>
+                style={styles.tableColumn}
+                textColor={theme.titleText}/>
 
             <InputableTableColumn
                 values={ivs}
@@ -139,6 +142,7 @@ function StatsTable(props){
                 maxValue={31}
                 maxSum={186} // could be any value
                 useMaxSum={false}
+                textColor={theme.titleText}
             />
 
             <InputableTableColumn
@@ -148,10 +152,12 @@ function StatsTable(props){
                 maxValue={252}
                 maxSum={510}
                 useMaxSum={true}
+                textColor={theme.titleText}
             />
             <FinalTableColumn
                 finalValues={finalValues}
                 statName={'Final'}
+                textColor={theme.titleText}
             /> 
 
     </View>
@@ -163,23 +169,18 @@ const styles = StyleSheet.create({
         flex:0,
         flexDirection:'row',
         justifyContent:'space-around',
+        borderRadius:10,
+        borderWidth:1,
     },
     tableColumn: {
         flex:1,
         justifyContent: 'space-around',
-        backgroundColor: colors.pressable,
     },
     tableCell: {
         fontSize:15,
         textAlign:'center',
         margin:5,
         padding:5,
-    },
-    inputCell: {
-        backgroundColor: 'white',
-        borderColor:'black',
-        borderWidth:1,
-        borderRadius:10,
     },
 });
 

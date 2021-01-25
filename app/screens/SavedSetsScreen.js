@@ -31,7 +31,6 @@ const styles = StyleSheet.create({
     },
     titleText: {
         flex: 1,
-        color: 'dimgray',
         padding: 10,
         fontSize: 30,  
         textAlign: 'center',

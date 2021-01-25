@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "PokemonCalc",
-    "slug": "PokemonCalc",
+    "name": "Pokemon Damage Calculator",
+    "slug": "pokemon-damage-calculator",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./app/assets/icon.png",
@@ -17,9 +17,13 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.elad-m.pokemon-damage-calculator",
+      "buildNumber": "1.0.0"
     },
     "android": {
+      "package": "com.elad-m.pokemon-damage-calculator",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./app/assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"

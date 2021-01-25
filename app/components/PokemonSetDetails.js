@@ -1,7 +1,6 @@
 import React from 'react';
 import {
-    Text,
-    Pressable,
+    StyleSheet,
     View
 } from 'react-native';
 
@@ -10,16 +9,16 @@ import SearchableModalSelector from './SearchableModalSelector';
 import StatsTable from './StatsTable';
 
 function PokemonSetDetails(props){
-    const {pokemonSet, dispatchPokemon, titleTextViewStyle, containerStyle, 
+    const {pokemonSet, dispatchPokemon, titleTextViewStyle, 
         items, natures} = props;
     return (
-        <View style={containerStyle}>
+        <View style={styles.sectionContent}>
             <RowWrapper
                 titleTextViewStyle={titleTextViewStyle}
                 titleFontSize={17}
                 message={`Nature: `}>
                 <SearchableModalSelector
-                    containerFlex={1}
+                    pressableFlex={1}
                     selected={pokemonSet.nature}
                     setSelected= {(payload) => dispatchPokemon({type: 'changeNature', payload:payload})}
                     queryFunction={(query) => natures.filter(nature =>  nature.name.startsWith(query))}
@@ -34,7 +33,7 @@ function PokemonSetDetails(props){
                 titleFontSize={17}
                 message={`Item: `}>
                 <SearchableModalSelector
-                    containerFlex={1}
+                    pressableFlex={1}
                     selected={pokemonSet.item}
                     setSelected= {(payload) => dispatchPokemon({type: 'changeItem', payload:payload})}
                     queryFunction={(query) => items.filter(item =>  item.name.startsWith(query))}
@@ -57,5 +56,14 @@ function PokemonSetDetails(props){
     );
 }
 
+const styles = StyleSheet.create({
+    
+    sectionContent: {
+        flex:1,
+        justifyContent:'flex-start',
+        alignItems:'stretch',
+        padding: 10,
+    },
+})
 
 export default PokemonSetDetails;

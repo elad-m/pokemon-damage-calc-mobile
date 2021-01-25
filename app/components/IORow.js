@@ -1,17 +1,9 @@
 import React, {useState} from 'react';
 import { useEffect } from 'react';
-import { 
-    Text,
-    StyleSheet, 
-    View, 
-    Pressable,
-} from 'react-native';
-
-import colors from '../config/colors';
-import dimens from '../config/dimens';
 
 import RowWrapper from './RowWrapper';
-import PokemonSetConfigModal from './PokemonSetConfigModal';
+import PokemonSetIOModal from './PokemonSetIOModal';
+import GenericPressable from './GenericPressable';
 
 
 function IORow(props){
@@ -35,78 +27,36 @@ function IORow(props){
     },[shouldRefresh])
     
     return (
+        <>
+        <PokemonSetIOModal
+            isModalVisible={isModalVisible}
+            setIsModalVisible={setIsModalVisible}
+            databaseService={databaseService}
+            dispatchPokemon={dispatchPokemon}
+            savedSets={savedSets}
+            setShouldRefresh={setShouldRefresh}
+        />
         <RowWrapper>
-            <PokemonSetConfigModal
-                isModalVisible={isModalVisible}
-                setIsModalVisible={setIsModalVisible}
-                databaseService={databaseService}
-                dispatchPokemon={dispatchPokemon}
-                savedSets={savedSets}
-                setShouldRefresh={setShouldRefresh}
-            />
-            <Pressable 
-                style={styles.pressableWrapper}
-                style={({pressed}) => [{opacity: pressed? 0.5 : 1}, styles.pressableWrapper]}
-                activeOpacity={0.3}
-                onPress={() => {
+            <GenericPressable
+                onPressFunc={() => {
                     databaseService.addSet(pokemonSet);
                     setShouldRefresh(true);
                 }}
-                >
-                <Text style={styles.pressableInnerText}>Save</Text>
-            </Pressable>
-            <Pressable 
-                style={styles.pressableWrapper}
-                style={({pressed}) => [{opacity: pressed? 0.5 : 1}, styles.pressableWrapper]}
-                activeOpacity={0.3}
-                onPress={() => {
-                    setIsModalVisible(true);
-                }}
-                >
-                <Text style={styles.pressableInnerText}>Load</Text>
-            </Pressable>
-            {/* <Pressable 
-                style={styles.pressableWrapper}
-                style={({pressed}) => [{opacity: pressed? 0.5 : 1}, styles.pressableWrapper]}
-                activeOpacity={0.3}
-                onPress={() => databaseService.resetDataBase()}
-                >
-                <Text style={styles.pressableInnerText}>danger_reset</Text>
-            </Pressable> */}
+                text={'Save'}
+                fontSize={12}
+                textPadding={8}
+                pressableFlex={1}/>
+            <GenericPressable
+                onPressFunc={() => setIsModalVisible(true)}
+                text={'Load'}
+                fontSize={12}
+                textPadding={8}
+                pressableFlex={1}/>
         </RowWrapper>
-
+        </>
     );
 }
 
-const styles = StyleSheet.create({  
-    setContainer: {
-        flex:1,
-        alignItems:'stretch',
-        margin:dimens.mainMargin
-    },
-    pressableWrapper:{
-        flex:1, 
-        alignSelf:'center',
-        backgroundColor: colors.pressable,
-        margin:dimens.mainMargin,
-        borderRadius: dimens.defaultBorderRadius,    
-        borderColor:'grey',
-        borderWidth:1,
-        elevation:2,
 
-        shadowColor: "black", // ios only
-        shadowOffset: {
-          width: 5,
-          height: 5
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    },
-    pressableInnerText:{
-        textAlign:'center',
-        fontSize: 12,  
-        padding: 8,
-    },
-});
 
 export default IORow;

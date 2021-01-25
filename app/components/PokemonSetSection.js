@@ -1,4 +1,4 @@
-import React, {useEffect, useState } from 'react';
+import React, {useContext, useEffect, useState } from 'react';
 import { 
     Text,
     ActivityIndicator,
@@ -15,24 +15,27 @@ import Collapsible from 'react-native-collapsible/Collapsible';
 import SearchableModalSelector from './SearchableModalSelector';
 import MoveRow from './MoveRow';
 import PokemonSetDetails from './PokemonSetDetails';
-import PressableToModal from './PressableToModal';
+import PressActivatedModalContainer from './PressActivatedModalContainer';
 
 import colors from '../config/colors';
 import dimens from '../config/dimens';
 import IORow from './IORow';
+import ThemeContext from '../config/ThemeContext';
 
 const jsdom = require('jsdom-jscore-rn');
 
 function SetHeader(props){
-    const {allPokemonData, databaseService, pokemonSet, dispatchPokemon, pokemonNumber, navigation} = props;
+    const {theme} = useContext(ThemeContext);
+    const {allPokemonData, databaseService, pokemonSet, dispatchPokemon, pokemonNumber, titleTextViewStyle} = props;
     return (
-        <View style={styles.sectionHeader}>
+        <View style={{...styles.sectionHeader, borderColor:theme.divider}}>
             <IORow
                 databaseService={databaseService}
                 pokemonSet={pokemonSet}
                 dispatchPokemon={dispatchPokemon}
             />
             <SearchableModalSelector
+                pressableFlex={0}
                 selected={pokemonSet.pokemon}
                 setSelected={(payload) => dispatchPokemon({type: 'changePokemon', payload:payload})}
                 queryFunction={(query) => allPokemonData.pokedexPerGen.filter(pokemon =>  pokemon.name.startsWith(query))}
@@ -42,14 +45,14 @@ function SetHeader(props){
                 selectorFontSize={20}
             />
             <MoveRow 
-                titleTextViewStyle={styles.titleTextView}
+                titleTextViewStyle={titleTextViewStyle}
                 titleFontSize={17}
                 message={'Move: '}
                 move={pokemonSet.moves}
                 isInResult={pokemonNumber === 1}
                 >
                 <SearchableModalSelector
-                    containerFlex={2}
+                    pressableFlex={2}
                     selected={pokemonSet.moves}
                     setSelected= {(payload) => dispatchPokemon({type: 'changeMove', payload:payload})}
                     queryFunction={(query) => allPokemonData.movesPerGen.filter(move =>  move.name.startsWith(query))}
@@ -101,31 +104,31 @@ function FetchPokemonImage(props){
 
 
 function Footer(){
+    const {theme} = useContext(ThemeContext);
     return (
-        <View style={styles.sectionFooter}>
+        <View style={{...styles.sectionFooter, borderColor:theme.divider}}>
             <Text style={{fontSize: 20, color:'black', textAlign: 'center',}}></Text>
         </View>   
     );
 }
 
-function PokemonSetCollapsible(props){
-    const {allPokemonData, pokemonSet, dispatchPokemon} =props;
+function PokemonSetSection(props){
+    const {allPokemonData, pokemonSet, dispatchPokemon, titleTextViewStyle} =props;
 
     return (
         <View style={styles.setContainer}> 
             <SetHeader
                 {...props}>
             </SetHeader>
-            <PressableToModal>
+            <PressActivatedModalContainer message={`More Set Details`}>
                 <PokemonSetDetails 
-                    containerStyle={styles.sectionContent}
-                    titleTextViewStyle={styles.titleTextView}
+                    titleTextViewStyle={titleTextViewStyle}
                     pokemonSet={pokemonSet}
                     dispatchPokemon={dispatchPokemon}
                     items={allPokemonData.itemsPerGen}
                     natures={allPokemonData.natures}
                     />
-            </PressableToModal>
+            </PressActivatedModalContainer>
             <Footer/>
         </View>
     );
@@ -137,10 +140,6 @@ const styles = StyleSheet.create({
         alignItems:'stretch',
         margin:dimens.mainMargin
     },
-    headerText: {
-        textAlign: 'center',
-        fontSize: 20,
-    },
     sectionHeader: {
         flex:1,
         alignItems: 'stretch',
@@ -148,58 +147,19 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderStartWidth: 1,
         borderEndWidth: 1,
-        borderColor: 'black',
         borderTopStartRadius:dimens.headerFooterRadius,
         borderTopEndRadius:dimens.headerFooterRadius,
-    },
-    sectionContent: {
-        flex:1,
-        alignItems:'stretch',
-        padding: 10,
     },
     sectionFooter: {
         height:20, 
         borderBottomWidth: 1,
         borderStartWidth: 1,
         borderEndWidth: 1,
-        borderColor: 'black',
         borderBottomStartRadius:dimens.headerFooterRadius,
         borderBottomEndRadius:dimens.headerFooterRadius,
     },
-    titleTextView: {
-        flex:1, 
-        alignSelf:'center',
-    },
-    titleText:{
-        textAlign: 'center',
-        color: 'black',
-        fontSize: 20,
-    },
-    pressableWrapper:{
-        flex:1, 
-        alignSelf:'center',
-        backgroundColor: colors.pressable,
-        margin:dimens.mainMargin,
-        borderRadius: dimens.defaultBorderRadius,    
-        borderColor:'grey',
-        borderWidth:1,
-        elevation:2,
-
-        shadowColor: "black", // ios only
-        shadowOffset: {
-          width: 5,
-          height: 5
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    },
-    pressableInnerText:{
-        textAlign:'center',
-        fontSize: 12,  
-        padding: 8,
-    },
-
+    
     
 });
 
-export default PokemonSetCollapsible;
+export default PokemonSetSection;

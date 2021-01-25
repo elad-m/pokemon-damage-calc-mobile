@@ -1,8 +1,10 @@
 
 import React, {useEffect, useState} from 'react';
+import { useContext } from 'react';
 import {TextInput, View, StyleSheet } from 'react-native';
 
 import colors from '../config/colors';
+import ThemeContext from '../config/ThemeContext';
 
 // returns a number from text between min and max, 0 if not a number
 function sanitizeTextInput(statEntries, text, min ,max, maxSum, useMaxSum){
@@ -19,6 +21,7 @@ function sanitizeTextInput(statEntries, text, min ,max, maxSum, useMaxSum){
 }
 
 function NumberTextInput(props){
+    const {theme} = useContext(ThemeContext);
     const {minValue, maxValue, entryKey, statEntries, setStatEntries, 
         maxSum, useMaxSum} = props;
 
@@ -27,25 +30,28 @@ function NumberTextInput(props){
         setInputText(statEntries[entryKey].toString());
     }, [statEntries])
 
+    function submitInput(event){
+        // not working on onFocus as I think is an expected use case 
+        const parsedNumber = sanitizeTextInput(statEntries, inputText, minValue, maxValue, maxSum, useMaxSum);
+        const newValues = {...statEntries};
+        newValues[entryKey] = parsedNumber;
+        setStatEntries(newValues);
+        setInputText(parsedNumber.toString());
+    }
     return (
-        <View style={styles.tableColumn}>
+        <View style={{backgroundColor:theme.secondary}}>
             <TextInput
-                style={[styles.inputCell, styles.tableCell]}
+                style={{...styles.inputCell, backgroundColor:theme.secondary,
+                    borderColor:theme.divider, color:theme.titleText}}
                 maxLength={3}
                 selectTextOnFocus={true}
-                keyboardType={'numeric'}      
+                keyboardType={'numeric'}
                 onChangeText={text => {
                     const parsedNumber = sanitizeTextInput(statEntries, text, minValue, maxValue, maxSum, useMaxSum);
                     // setting values here causes problems/complications with sum verifying
                     setInputText(parsedNumber.toString());
                 }}
-                onSubmitEditing={e => {
-                    const parsedNumber = sanitizeTextInput(statEntries, inputText, minValue, maxValue, maxSum, useMaxSum);
-                    const newValues = {...statEntries};
-                    newValues[entryKey] = parsedNumber;
-                    setStatEntries(newValues);
-                    setInputText(parsedNumber.toString());
-                }}
+                onSubmitEditing={submitInput}
                 value={inputText}      
             />
         </View>
@@ -53,18 +59,11 @@ function NumberTextInput(props){
 }
 
 const styles = StyleSheet.create({
-    tableColumn: {
-        backgroundColor: colors.pressable,    
-    },
-    tableCell: {
+    inputCell: {
         fontSize:15,
         textAlign:'center',
         margin:5,
         padding:5,
-    },
-    inputCell: {
-        backgroundColor: 'white',
-        borderColor:'black',
         borderWidth:1,
         borderRadius:10,
     },

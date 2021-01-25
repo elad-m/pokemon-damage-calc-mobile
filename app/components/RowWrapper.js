@@ -1,13 +1,16 @@
 import React from 'react';
+import { useContext } from 'react';
 import {Text, View, StyleSheet } from 'react-native';
+import ThemeContext from '../config/ThemeContext';
 
 function RowWrapper(props){
+    const {theme} = useContext(ThemeContext);
     const {message, titleTextViewStyle, titleFontSize} = props;
     return(
         <View style={styles.rowContainer}>
                 {message && 
                 <View style={titleTextViewStyle}>
-                    <Text style={{...styles.textStyle, fontSize:titleFontSize}}>
+                    <Text style={{color:theme.titleText ,textAlign:'center', fontSize:titleFontSize}}>
                         {message} 
                     </Text>
                 </View>
@@ -21,12 +24,9 @@ const styles = StyleSheet.create({
     rowContainer: {
         flex: 0,
         flexDirection:'row',
-        justifyContent:'center',
+        justifyContent:'space-around',
+        
         padding:5,
-    },
-    textStyle:{
-        textAlign:'center',
-        color: 'black', 
     },
 });
 

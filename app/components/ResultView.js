@@ -1,10 +1,15 @@
-import React, {useState} from 'react';
+import React, {useContext} from 'react';
 import {Text, View, StyleSheet, Pressable } from 'react-native';
 import Collapsible from 'react-native-collapsible/Collapsible';
 import Svg, { G, Polygon, TSpan } from 'react-native-svg';
+import  {Picker} from "@react-native-picker/picker";
 
-import colors from '../config/colors';
 import dimens from '../config/dimens';
+import RowWrapper from './RowWrapper';
+import ThemeContext from '../config/ThemeContext';
+import GenericModal from './GenericModal';
+import PressActivatedModalContainer from './PressActivatedModalContainer';
+import FieldView from './FieldView';
 
 const MAX_DAMAGE_IN_ARRAY = 14;
 const MIN_DAMAGE_IN_ARRAY = 0;
@@ -26,6 +31,7 @@ function getArrowData(isDown, arrowScaling=1){
 }
 
 function ArrowPressable(props){
+    const {theme} = useContext(ThemeContext);
     const {resultToShow, setResultToShow} = props;
     const [viewBox, scaledPoints] = getArrowData(resultToShow === 0);
     // console.log(`viewBox: ${viewBox} scaledPoints: ${scaledPoints}`);
@@ -36,23 +42,23 @@ function ArrowPressable(props){
             <Svg
                 height={'100'} width={'200'} 
                 viewBox={viewBox} 
-                stroke={colors.titleText}
+                stroke={theme.titleText}
                 >
                 <G >                
                     <Polygon
                         strokeWidth="0.5"
-                        fill={colors.pressable}
+                        fill={theme.pressable}
                         points={scaledPoints}
                         onPress={() => {
                             const newResultToShow = resultToShow === 0? 1: 0;
                             setResultToShow(newResultToShow);
                         }}
                     />
-                    <Text style={styles.arrowText} >
-                        {resultToShow === 0 && <TSpan x='19%' y={downArrowTextYAxis} fill='black' strokeWidth='0' fontSize='5'>
+                    <Text style={styles.arrowText}>
+                        {resultToShow === 0 && <TSpan x='19%' y={downArrowTextYAxis} fill={theme.titleText} strokeWidth='0' fontSize='5'>
                             Swap Attacker
                         </TSpan>}
-                        {resultToShow === 1 && <TSpan x='19%' y={upArrowTextYAxis} fill='black' strokeWidth='0' fontSize='5'>
+                        {resultToShow === 1 && <TSpan x='19%' y={upArrowTextYAxis} fill={theme.titleText} strokeWidth='0' fontSize='5'>
                             Swap Attacker
                         </TSpan>}
                     </Text>
@@ -73,64 +79,81 @@ function getChanceForKO(damageResults, resultToShow){
     return chanceForKO;
 }
 
+function getAllWeatherTypesAsPickerItems(weatherConditions, textColor){
+    // assuming array of strings
+    return weatherConditions.map((obj) => {
+        return(
+            <Picker.Item label={obj} value={obj} key={obj} color={textColor}/>
+        );
+    })
+}
+
+
 function ResultView(props){
-    const {damageResults, resultToShow, setResultToShow} = props;
-
-    const [collapsibleState, setCollapsibleState] = useState({
-        collapsed: true,
-    });
-
-    const toggleExpanded = () => {
-        setCollapsibleState({ collapsed: !collapsibleState.collapsed });
-    };
-
+    const {theme} = useContext(ThemeContext);
+    const {damageResults, resultToShow, setResultToShow,
+        weather, setWeather, weatherConditions, titleTextViewStyle} = props;
+    const weatherPickerOptions = getAllWeatherTypesAsPickerItems(weatherConditions, theme.titleText);
     if(!damageResults || damageResults.length < 2){
         console.error(`Bad length of damage array: ${damageResults? damageResults.length: -1}`);
     }
     const chanceForKO = getChanceForKO(damageResults, resultToShow);
     return(
-        <View style={{...styles.resultContainer}}>
-            <Text style={{...styles.titleText, 
-            color:colors.titleText, fontWeight:'bold', 
-            backgroundColor:colors.header,}}>
-                {'Result'}
-            </Text>
-            <Text style={{...styles.titleText}}>
+        <View style={{...styles.resultContainer, borderColor:theme.divider}}>
+            <View style={{ backgroundColor:theme.header,}}>
+                <Text style={{...styles.titleText, color:theme.titleText, fontWeight:'bold',}}>
+                    {'Result'}
+                </Text>
+            </View>
+            <Text style={{...styles.titleText, color: theme.titleText}}>
                 {damageResults[resultToShow].damage[MIN_DAMAGE_IN_ARRAY]|| 0}-{damageResults[resultToShow].damage[MAX_DAMAGE_IN_ARRAY] || 0}
                 {' damage'}
                 {'\n' + chanceForKO}
             </Text>
+            <RowWrapper
+                message={'Weather:'}
+                titleTextViewStyle={titleTextViewStyle}
+                titleFontSize={17}
+                textColor={theme.titleText}
+            >
+                <Picker
+                    style={{flex:1, backgroundColor:theme.primary}}
+                    testID='basic-picker'
+                    selectedValue={weather}
+                    onValueChange={ (v) => setWeather(v)}>
+                    {weatherPickerOptions}
+                </Picker>
+            </RowWrapper>
+            {/* <PressActivatedModalContainer message={'Field Settings'}>
+                <RowWrapper
+                    message={'Weather:'}
+                    titleTextViewStyle={titleTextViewStyle}
+                    titleFontSize={17}
+                    textColor={theme.titleText}
+                >
+                    <Picker
+                        style={{flex:1, backgroundColor:theme.primary}}
+                        testID='basic-picker'
+                        selectedValue={weather}
+                        onValueChange={ (v) => setWeather(v)}>
+                        {weatherPickerOptions}
+                    </Picker>
+                </RowWrapper>
+                <FieldView/>
+            </PressActivatedModalContainer> */}
+            
             <ArrowPressable
                 resultToShow={resultToShow}
                 setResultToShow={setResultToShow}
             />
-
-            {/* <Pressable 
-                style={{...styles.pressableWrapper, flex:0}}
-                style={({pressed}) => [{opacity: pressed? 0.5 : 1}, styles.pressableWrapper]}
-                activeOpacity={0.3}
-                onPress={toggleExpanded}>
-                <Text style={{...styles.pressableInnerText}}>
-                    Spread/Collapse
-                </Text>
-            </Pressable>
-            <Collapsible collapsed={collapsibleState.collapsed} align="center">
-                <Text style={{fontSize:50}}>
-                    Collapsed Text {'\n'}
-                    Collapsed Text{'\n'}
-                    Collapsed Text{'\n'}
-                    Collapsed Text{'\n'}
-                </Text>
-            </Collapsible> */}
         </View>
-);
+    );
 }
 
 const styles = StyleSheet.create({
     resultContainer: {
         overflow:'hidden',
         margin:dimens.mainMargin,
-        borderColor:'black',
         borderWidth: 1,
         borderRadius:dimens.headerFooterRadius,
     },
@@ -141,36 +164,13 @@ const styles = StyleSheet.create({
     },
     titleText:{
         textAlign: 'center',
-        color: colors.titleText,
         fontSize: 20,
         padding: 10,
     },
     arrowText:{
         textAlign:'center',
     },
-    pressableWrapper:{
-        flex:1, 
-        alignSelf:'stretch',
-        backgroundColor: colors.pressable,
-        margin:dimens.mainMargin,
-        borderRadius: dimens.defaultBorderRadius,    
-        borderColor:'grey',
-        borderWidth:1,
-        elevation:2,
-
-        shadowColor: "black", // ios only
-        shadowOffset: {
-          width: 5,
-          height: 5
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    },
-    pressableInnerText:{
-        textAlign:'center',
-        fontSize: 20,  
-        padding: 10,        
-    },
+    
 });
 
 export default ResultView;

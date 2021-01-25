@@ -1,17 +1,27 @@
 export default {
-    //general
-    // header: '#547a60',
-    // primary: '#a5d6b3',
-    // secondary: '#b4d6be',
-    // clearButton: '#ff8080',
-    // opaqueClearButton: '#ffd4d4',
-    // pressable: 'lightblue',
-    header: 'bisque',
-    primary: 'beige',
+    
+    header: 'blanchedalmond',
+    primary: '#f0f0f0',
     secondary: 'azure',
+    border:'#282828',
     clearButton: '#ff8080',
     opaqueClearButton: '#ffd4d4',
-    pressable: 'lightcyan',
+    pressable: '#d0f0ff',
+    divider: 'black',
+
+    darkHeader: '#500050',
+    darkPrimary: '#232223',
+    darkSecondary: '#323232',
+    darkBorder:'#606060',
+
+    darkPressable:'darkcyan',
+    darkDivider:'#707070',
+    
     // text
     titleText: '#4d4d4d',
+    secondaryText: '#909090',
+    
+    darkTitleText: '#f5f5f5',
+    darkSecondaryText: '#b3b3b3'
+    
 }

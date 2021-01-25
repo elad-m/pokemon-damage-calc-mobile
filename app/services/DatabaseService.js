@@ -1,11 +1,10 @@
 import * as SQLite from 'expo-sqlite';
 
-function DatabaseService(sid){
+function DatabaseService(){
 
     /**
      * private
      */
-    const serviceId = sid;
     const db = SQLite.openDatabase('pokemonSets2.db');
     const INIT_TABLE = 'CREATE TABLE IF NOT EXISTS pokemonSets (id INTEGER PRIMARY KEY NOT NULL, pokemon_set BLOB);';
     const GET_ALL = `SELECT * FROM pokemonSets;`;
@@ -50,11 +49,11 @@ function DatabaseService(sid){
     // public
     function init(){
         const onSuccess = () => {
-            console.log(`db created successfully with sid: ${serviceId}`);
+            console.log(`db service created successfully`);
         };
         const onError = (_, error) => {
             console.log(error);
-            console.log(`error creating db`);
+            console.log(`error creating db service`);
         };
         db.transaction(tx => {
             tx.executeSql(
