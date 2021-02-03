@@ -2,12 +2,10 @@ import React, {useContext} from 'react';
 import {View, 
   SafeAreaView,
   Modal,
-  Pressable,
   StyleSheet} from 'react-native';
 import colors from '../config/colors';
 import dimens from '../config/dimens';
 import ThemeContext from '../config/ThemeContext';
-import GenericPressable from './GenericPressable';
 
 export default function GenericModal(props){
     const {theme} = useContext(ThemeContext);
@@ -43,6 +41,14 @@ export default function GenericModal(props){
 }
 
 const styles = StyleSheet.create({
+    modalSelectorContainer: {
+        flex:1, 
+        justifyContent:'center',
+        alignItems:'center',
+    
+        borderStartWidth: 1,
+        borderEndWidth: 1,
+      },
     centeredView: {
         flex:1,
         justifyContent:'center',

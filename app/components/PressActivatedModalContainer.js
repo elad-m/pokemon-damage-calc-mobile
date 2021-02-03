@@ -1,36 +1,32 @@
-import React, {useState, useContext} from 'react';
-import {
-    ScrollView,
+import React, {useState} from 'react';
+import {View,
     StyleSheet,
 } from 'react-native';
 import colors from '../config/colors';
-import ThemeContext from '../config/ThemeContext';
 import GenericPressable from './GenericPressable';
 import GenericModal from './GenericModal';
 
 // Usage: for pokemon set details, instead of failing Collapsible
-function PressActivatedModalContainer({children, message}){
-    const {theme} = useContext(ThemeContext);
-    const [areResultsVisible, setResultsVisible] = useState(false);
+// and for pickers without querying option
+function PressActivatedModalContainer({children, message, pressableFlex=1, alignPressable='stretch'}){
+    const [isModalVisible, setModalVisible] = useState(false);
     return(
-        <ScrollView
-            contentContainerStyle={{...styles.modalSelectorContainer, borderColor:theme.divider}}
-            keyboardShouldPersistTaps={'always'}
-            >
-            <GenericModal isModalVisible={areResultsVisible}>
+        <View style={styles.modalSelectorContainer}>
+            <GenericModal isModalVisible={isModalVisible}>
                 {children}
                 <GenericPressable
-                    onPressFunc={() => setResultsVisible(false)}
+                    onPressFunc={() => setModalVisible(false)}
                     text={'Back'}
                     pressableFlex={0}
                 />
             </GenericModal>
             <GenericPressable
-                onPressFunc={() => setResultsVisible(true)}
+                pressableFlex={pressableFlex}
+                onPressFunc={() => setModalVisible(true)}
                 text={message}
-                fontSize={15}
-                alignSelf={'center'}/>
-        </ScrollView> 
+                fontSize={17}
+                alignSelf={alignPressable}/>
+        </View>
     );
 }
 
@@ -39,9 +35,7 @@ const styles = StyleSheet.create({
     flex:1, 
     justifyContent:'center',
     alignItems:'center',
-
-    borderStartWidth: 1,
-    borderEndWidth: 1,
+    margin:5
   },
   centeredView: {
       flex:1,

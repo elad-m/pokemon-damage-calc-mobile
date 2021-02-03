@@ -1,7 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { 
     Dimensions,
-    Modal,
     Pressable,
     FlatList,
     SafeAreaView,
@@ -17,7 +16,7 @@ import GenericPressable from './GenericPressable';
 
 function Item(props){
     const {item, setIsModalVisible, databaseService, 
-        dispatchPokemon, isInDeleteMode, setIsInDeleteMode, setShouldRefresh, theme} = props;
+        dispatchPokemon, isInDeleteMode, setIsInDeleteMode, setShouldRefresh} = props;
     const {id, pokemon_set} = item;
 
     function onItemPress(){
@@ -85,6 +84,7 @@ function PokemonSetIOModal(props){
                         />
                     <View style={{flexDirection:'row'}}>
                         <GenericPressable
+                            minHeight={20}
                             onPressFunc={() => {
                                 setIsInDeleteMode(false);
                                 setIsModalVisible(false);
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     pressableWrapper:{
         flex:1, 
         alignSelf:'stretch',
-        margin:dimens.mainMargin,
+        margin:dimens.secondaryMargin,
         borderRadius: 10,   
         borderWidth:1,
         elevation:2,

@@ -9,5 +9,6 @@ export default {
 
     //
     mainMargin: 10,
+    secondaryMargin:5,
 
 }

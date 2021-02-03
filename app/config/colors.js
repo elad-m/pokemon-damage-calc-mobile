@@ -18,8 +18,8 @@ export default {
     darkDivider:'#707070',
     
     // text
-    titleText: '#4d4d4d',
-    secondaryText: '#909090',
+    titleText: '#333333',
+    secondaryText: '#777777',
     
     darkTitleText: '#f5f5f5',
     darkSecondaryText: '#b3b3b3'

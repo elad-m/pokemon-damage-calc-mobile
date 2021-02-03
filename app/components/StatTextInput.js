@@ -3,7 +3,6 @@ import React, {useEffect, useState} from 'react';
 import { useContext } from 'react';
 import {TextInput, View, StyleSheet } from 'react-native';
 
-import colors from '../config/colors';
 import ThemeContext from '../config/ThemeContext';
 
 // returns a number from text between min and max, 0 if not a number
@@ -20,7 +19,7 @@ function sanitizeTextInput(statEntries, text, min ,max, maxSum, useMaxSum){
     return sumSanitized;
 }
 
-function NumberTextInput(props){
+function StatTextInput(props){
     const {theme} = useContext(ThemeContext);
     const {minValue, maxValue, entryKey, statEntries, setStatEntries, 
         maxSum, useMaxSum} = props;
@@ -63,11 +62,11 @@ const styles = StyleSheet.create({
         fontSize:15,
         textAlign:'center',
         margin:5,
-        padding:5,
+        padding:2,
         borderWidth:1,
         borderRadius:10,
     },
 });
 
-export default NumberTextInput;
+export default StatTextInput;
 

@@ -4,19 +4,26 @@ import ThemeContext from '../config/ThemeContext';
 
 import dimens from '../config/dimens';
 
-export default function GenericPressable({onPressFunc, text, opacity=0.5, pressableFlex=1, 
-    fontSize=20, textPadding=10, pressableMargin=10, alignSelf='stretch',...props}){
+export default function GenericPressable({onPressFunc, text, pressableBackgroundColor, 
+    textColor, opacity=0.5, pressableFlex=1, textViewFlex=0, fontSize=20,
+     textPadding=10, pressableMargin=5, alignSelf='stretch',minHeight=50, ...props}){
     const {theme} = useContext(ThemeContext);
+    const pressableBackgroundColor2 = pressableBackgroundColor || theme.pressable;
+    const textColor2 = textColor || theme.titleText;
     return (
         <Pressable
             style={{...styles.pressableWrapper, flex: pressableFlex, 
-                backgroundColor:theme.pressable, borderColor:theme.border, margin:pressableMargin, alignSelf:alignSelf}}
+                backgroundColor:pressableBackgroundColor2, borderColor:theme.border, 
+                margin:pressableMargin, alignSelf:alignSelf,
+            minHeight: minHeight}}
             style={({pressed}) => [{opacity: pressed? opacity : 1}, 
                 {...styles.pressableWrapper, flex: pressableFlex, 
-                    backgroundColor:theme.pressable, borderColor:theme.border, margin:pressableMargin, alignSelf:alignSelf}]}
+                    backgroundColor:pressableBackgroundColor2, borderColor:theme.border, 
+                    margin:pressableMargin, alignSelf:alignSelf}]}
             onPress={onPressFunc}>
-            <View>    
-                <Text style={{...styles.pressableInnerText, fontSize:fontSize, color:theme.titleText, padding: textPadding}}>
+            <View style={{flex:textViewFlex}}>    
+                <Text style={{...styles.pressableInnerText, fontSize:fontSize, color:textColor2, 
+                    padding: textPadding}}>
                     {text}
                 </Text>
                 {props.children}
@@ -26,7 +33,7 @@ export default function GenericPressable({onPressFunc, text, opacity=0.5, pressa
 }
 
 const styles = StyleSheet.create({
-    pressableWrapper:{  
+    pressableWrapper:{ 
         borderWidth:dimens.defaultBorderWidth,
         elevation:dimens.defaultElevation,
         borderRadius: dimens.defaultBorderRadius,
@@ -40,7 +47,7 @@ const styles = StyleSheet.create({
         shadowRadius: 3.84,
       },
       pressableInnerText:{
-          textAlign:'center',      
+          textAlign:'center',    
       },
 })
               

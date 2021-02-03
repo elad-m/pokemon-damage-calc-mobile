@@ -5,9 +5,11 @@ import ThemeContext from '../config/ThemeContext';
 
 function RowWrapper(props){
     const {theme} = useContext(ThemeContext);
-    const {message, titleTextViewStyle, titleFontSize} = props;
+    const {message, titleTextViewStyle, titleFontSize, 
+        justifyContentContainer='space-around', padding=10} = props;
     return(
-        <View style={styles.rowContainer}>
+        <View style={{...styles.rowContainer, 
+        justifyContent:justifyContentContainer, padding:padding}}>
                 {message && 
                 <View style={titleTextViewStyle}>
                     <Text style={{color:theme.titleText ,textAlign:'center', fontSize:titleFontSize}}>
@@ -22,11 +24,10 @@ function RowWrapper(props){
 
 const styles = StyleSheet.create({
     rowContainer: {
-        flex: 0,
+        flex: 0, // should possibly be 0 when there are weird modal changes
         flexDirection:'row',
-        justifyContent:'space-around',
-        
-        padding:5,
+        alignItems:'center',
+
     },
 });
 

@@ -14,13 +14,13 @@ function MoveRow(props){
             </View>
             {props.children}
             <View style={titleTextViewStyle}>
-                <Text style={{...styles.textStyle, fontSize: 12, color:theme.secondaryText}}>
+                <Text style={{...styles.textStyle, fontSize: 12, color:theme.titleText}}>
                     {move.type} 
                 </Text>
-                <Text style={{...styles.textStyle, fontSize: 12, color:theme.secondaryText}}>
+                <Text style={{...styles.textStyle, fontSize: 12, color:theme.titleText}}>
                     {move.category} 
                 </Text>
-                <Text style={{...styles.textStyle, fontSize: 12, color:theme.secondaryText}}>
+                <Text style={{...styles.textStyle, fontSize: 12, color:theme.titleText}}>
                     {move.basePower? move.basePower: 0} 
                 </Text>
             </View>
@@ -33,11 +33,9 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection:'row',
         justifyContent:'space-around',
-        padding:5,
     },
     textStyle:{
         textAlign:'center',
-        color: 'black', 
     },
 });
 

@@ -1,7 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { 
     KeyboardAvoidingView,
-    Dimensions,
     Pressable,
     FlatList,
     TextInput,
@@ -9,10 +8,7 @@ import {
     Text, 
     View, 
     Keyboard,
-    StatusBar,
     Platform,} from 'react-native';
-
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 import colors from '../config/colors';
 import dimens from '../config/dimens';
@@ -55,9 +51,10 @@ function ItemPickerTextInput(props){
         >
             <TextInput 
                 style={{...styles.modalSelectorTextInput, backgroundColor:theme.secondary,
-                borderColor:theme.divider}}
+                    color:theme.titleText, borderColor:theme.divider}}
                 maxLength={20}
                 placeholder={`Enter a ${message.toLowerCase()}'s name`}
+                
                 placeholderTextColor={theme.secondaryText}
                 onFocus={e => {
                     setQueryResults(queryFunction(searchText));
@@ -100,9 +97,9 @@ function Item(props){
   );
 }
 
-function SearchableModalSelector(props){
+function SearchableModalSelector({padding=5,paddingTop, ...props}){
     const {theme} = useContext(ThemeContext);
-    const {pressableFlex} = props;
+    const {pressableFlex, rootViewFlex=1} = props;
 
     const [areResultsVisible, setResultsVisible] = useState(false);
     const [searchText, setSearchText] = useState('');
@@ -120,8 +117,9 @@ function SearchableModalSelector(props){
     );
 
     return (
-    <>
-        <GenericModal 
+        <View style={{flex:rootViewFlex, justifyContent:'center', alignItems:'center',
+            padding:padding, paddingTop:paddingTop}}>
+            <GenericModal 
                 isModalVisible={areResultsVisible}
                 modalViewFlex={1}>
                 <ItemPickerTextInput
@@ -144,8 +142,8 @@ function SearchableModalSelector(props){
                 </View>
                 <View style={{...styles.resultsListButtonsRowView, 
                     backgroundColor:theme.header}}>
-                    {/* Done Button*/}
                     <GenericPressable
+                        minHeight={20}
                         onPressFunc={() => {
                             setResultsVisible(false);
                             setSearchText(props.selected.name || props.selected);
@@ -161,14 +159,13 @@ function SearchableModalSelector(props){
                     />
                 </View>
             </GenericModal>
-
             <GenericPressable
                 onPressFunc={() => setResultsVisible(true)}
                 text={props.selected.name || props.selected}
                 pressableFlex={pressableFlex}
                 fontSize={props.selectorFontSize}
             />
-        </>
+        </View>
     );
 }
 
@@ -176,7 +173,7 @@ const styles = StyleSheet.create({
     clearButtonWrapper:{
         flex:1,
         alignSelf:'stretch',
-        margin:dimens.mainMargin,
+        margin:dimens.secondaryMargin,
         borderRadius: dimens.defaultBorderRadius,
         borderWidth:dimens.defaultBorderWidth,
         elevation:dimens.defaultElevation,

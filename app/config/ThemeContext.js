@@ -1,5 +1,5 @@
 import React from 'react';
-import colors from './colors'
+import colors from './colors';
 
 export const themes = {
 
@@ -47,9 +47,7 @@ export const themes = {
     },
 };
 
-const ThemeContext = React.createContext({
-    theme: themes.light,
-});
+const ThemeContext = React.createContext();
 
 function ThemeProvider(props){
     const [theme, setTheme] = React.useState(themes.light);

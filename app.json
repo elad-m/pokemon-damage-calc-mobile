@@ -18,15 +18,15 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.elad-m.pokemon-damage-calculator",
+      "bundleIdentifier": "com.eladM.pokemonDamageCalculator2881",
       "buildNumber": "1.0.0"
     },
     "android": {
-      "package": "com.elad-m.pokemon-damage-calculator",
+      "package": "com.eladM.pokemonDamageCalculator2881",
       "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./app/assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#F0F0F0"
       }
     },
     "web": {

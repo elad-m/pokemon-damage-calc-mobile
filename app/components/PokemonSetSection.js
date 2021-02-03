@@ -1,41 +1,31 @@
-import React, {useContext, useEffect, useState } from 'react';
+import React, {useContext} from 'react';
 import { 
     Text,
-    ActivityIndicator,
-    Image,
     StyleSheet, 
     View, 
-    Pressable,
-    Modal,
     } from 'react-native';
-
-
-import Collapsible from 'react-native-collapsible/Collapsible';
 
 import SearchableModalSelector from './SearchableModalSelector';
 import MoveRow from './MoveRow';
 import PokemonSetDetails from './PokemonSetDetails';
 import PressActivatedModalContainer from './PressActivatedModalContainer';
 
-import colors from '../config/colors';
 import dimens from '../config/dimens';
 import IORow from './IORow';
 import ThemeContext from '../config/ThemeContext';
 
-const jsdom = require('jsdom-jscore-rn');
 
 function SetHeader(props){
     const {theme} = useContext(ThemeContext);
-    const {allPokemonData, databaseService, pokemonSet, dispatchPokemon, pokemonNumber, titleTextViewStyle} = props;
+    const {allPokemonData, pokemonSet, dispatchPokemon, pokemonNumber, titleTextViewStyle} = props;
     return (
         <View style={{...styles.sectionHeader, borderColor:theme.divider}}>
-            <IORow
-                databaseService={databaseService}
-                pokemonSet={pokemonSet}
-                dispatchPokemon={dispatchPokemon}
-            />
+            <View style={{backgroundColor:theme.header}}>
+                <Text style={{...styles.headingText, color:theme.titleText}}>Pokémon {pokemonNumber}</Text>
+            </View>
             <SearchableModalSelector
                 pressableFlex={0}
+                paddingTop={10}
                 selected={pokemonSet.pokemon}
                 setSelected={(payload) => dispatchPokemon({type: 'changePokemon', payload:payload})}
                 queryFunction={(query) => allPokemonData.pokedexPerGen.filter(pokemon =>  pokemon.name.startsWith(query))}
@@ -48,12 +38,14 @@ function SetHeader(props){
                 titleTextViewStyle={titleTextViewStyle}
                 titleFontSize={17}
                 message={'Move: '}
-                move={pokemonSet.moves}
+                move={pokemonSet.move}
                 isInResult={pokemonNumber === 1}
                 >
                 <SearchableModalSelector
                     pressableFlex={2}
-                    selected={pokemonSet.moves}
+                    rootViewFlex={2}
+                    padding={0}
+                    selected={pokemonSet.move}
                     setSelected= {(payload) => dispatchPokemon({type: 'changeMove', payload:payload})}
                     queryFunction={(query) => allPokemonData.movesPerGen.filter(move =>  move.name.startsWith(query))}
                     allResults={allPokemonData.movesPerGen}
@@ -62,74 +54,56 @@ function SetHeader(props){
                     selectorFontSize={17}
                 />
             </MoveRow>
-            {props.children}
         </View>
   );
 };
 
-
-function FetchPokemonImage(props){
-    const bulbaRequest = `https://bulbapedia.bulbagarden.net/wiki/${props.pokemonName}_(Pok%C3%A9mon)`;
-    const [isLoading, setLoading] = useState(true);
-    const [imageURI, setImageURI] = useState("https://i.imgur.com/TkIrScD.png");// return to []?
-  
-    // useEffect(() => {
-    //   fetch(bulbaRequest)
-    //     .then((response) => 
-    //         response.text()
-    //     )
-    //     .then((text) => {
-    //         jsdom.env(text, (_,dom) => {
-    //             let uri = dom.document.querySelector('meta[property="og:image"]').content;
-    //             console.log(`uri? : ${uri}`);
-    //             setImageURI(uri);    
-    //         }) // not sure how to turn this into a pure promise chaining with 'then'
-    //     })
-    //     .catch((error) => console.error(error))
-    //     .finally(() => setLoading(false));
-    // }, [props.pokemonName]);
-  
-    return (
-      <View style={{ flex: 1, padding: 24 }}>
-        {isLoading ? <ActivityIndicator/> : (
-            <View>
-                <Image source={{uri: imageURI}} 
-                    style={{width: 305, height: 160}}
-                    resizeMode='contain'/>
-            </View>
-        )}
-      </View>
-    );
-}
-
-
-function Footer(){
+function DetailsSummaryLine({pokemonSet}){
     const {theme} = useContext(ThemeContext);
-    return (
-        <View style={{...styles.sectionFooter, borderColor:theme.divider}}>
-            <Text style={{fontSize: 20, color:'black', textAlign: 'center',}}></Text>
-        </View>   
+    const {level, ability, nature, item, evs} = pokemonSet;
+    const evsPrint = Object.entries(evs)
+        .map(obj => obj[1] > 0? obj[0] + ":"+ obj[1]: null)
+        .join(" "); // print only non-zero evs
+    return(
+        <View style={{flex:1, justifyContent:'center', alignItems:'center',
+        margin:5}}>
+            <Text style={{color:theme.secondaryText}}>
+                {level} | {nature.name} | {ability.name} | {item.name}
+            </Text>
+            <Text style={{color:theme.secondaryText}}>
+                {evsPrint}
+            </Text>
+        </View>
     );
 }
+
 
 function PokemonSetSection(props){
-    const {allPokemonData, pokemonSet, dispatchPokemon, titleTextViewStyle} =props;
-
+    const {theme} = useContext(ThemeContext);
+    const {allPokemonData, pokemonSet, dispatchPokemon, 
+        titleTextViewStyle, databaseService} =props;
     return (
-        <View style={styles.setContainer}> 
-            <SetHeader
-                {...props}>
-            </SetHeader>
-            <PressActivatedModalContainer message={`More Set Details`}>
+        <View style={{...styles.setContainer, borderColor:theme.border}}> 
+            <SetHeader {...props}/>
+            <PressActivatedModalContainer 
+                message={`More Set Details`}
+                alignPressable={'center'}>
                 <PokemonSetDetails 
                     titleTextViewStyle={titleTextViewStyle}
                     pokemonSet={pokemonSet}
                     dispatchPokemon={dispatchPokemon}
                     items={allPokemonData.itemsPerGen}
                     natures={allPokemonData.natures}
+                    abilities={allPokemonData.abilitiesPerGen}
+                    statusConditions={allPokemonData.STATUS_NAMES}
                     />
-            </PressActivatedModalContainer>
-            <Footer/>
+                </PressActivatedModalContainer>
+            <DetailsSummaryLine pokemonSet={pokemonSet}/>
+            <IORow
+                databaseService={databaseService}
+                pokemonSet={pokemonSet}
+                dispatchPokemon={dispatchPokemon}
+            />
         </View>
     );
 }
@@ -137,28 +111,24 @@ function PokemonSetSection(props){
 const styles = StyleSheet.create({  
     setContainer: {
         flex:1,
+        justifyContent:'flex-start',
         alignItems:'stretch',
-        margin:dimens.mainMargin
+        margin:dimens.mainMargin,
+        borderWidth:dimens.defaultBorderWidth,
+        borderRadius:dimens.defaultBorderRadius,
+        overflow:'hidden',
     },
     sectionHeader: {
         flex:1,
+        justifyContent:'flex-start',
         alignItems: 'stretch',
-
-        borderTopWidth: 1,
-        borderStartWidth: 1,
-        borderEndWidth: 1,
-        borderTopStartRadius:dimens.headerFooterRadius,
-        borderTopEndRadius:dimens.headerFooterRadius,
     },
-    sectionFooter: {
-        height:20, 
-        borderBottomWidth: 1,
-        borderStartWidth: 1,
-        borderEndWidth: 1,
-        borderBottomStartRadius:dimens.headerFooterRadius,
-        borderBottomEndRadius:dimens.headerFooterRadius,
-    },
-    
+    headingText: {
+        fontSize:20, 
+        textAlign:'center', 
+        fontWeight:'bold',
+        padding: 5
+    }
     
 });
 
